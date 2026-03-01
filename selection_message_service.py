@@ -65,7 +65,8 @@ YÊU CẦU:
 1. Phân tích ý nghĩa ngữ nghĩa của các tin nhắn văn bản
 2. So sánh với nội dung preview của từng tin nhắn media
 3. Chọn tin nhắn media PHÙ HỢP NHẤT hoặc liên quan nhất đến nội dung văn bản
-4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về "NONE"
+4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về số thử tự của media cuối cùng
+5. Nếu KHÔNG có media nào trả về "NONE"
 
 ĐỊNH DẠNG TRẢ LỜI:
 Bạn CHỈ được trả về số thứ tự của media (ví dụ: "1", "2", "3", v.v.) hoặc "NONE".
