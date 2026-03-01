@@ -2,8 +2,8 @@ name: Telegram Poll and Post
 
 on:
   schedule:
-    # Run every 4 hours
-    - cron: "0 */4 * * *"
+    # Run every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
           TELEGRAM_CHANNEL_USERNAMES: ${{ secrets.TELEGRAM_CHANNEL_USERNAMES || 'vnwallstreet' }}
           TELEGRAM_CHANNEL_IDS: ${{ secrets.TELEGRAM_CHANNEL_IDS }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-          TELEGRAM_WINDOW_SECONDS: ${{ secrets.TELEGRAM_WINDOW_SECONDS || '14400' }}
+          TELEGRAM_WINDOW_SECONDS: ${{ secrets.TELEGRAM_WINDOW_SECONDS || '21600' }}
           TELEGRAM_FETCH_LIMIT: ${{ secrets.TELEGRAM_FETCH_LIMIT || '1000' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
