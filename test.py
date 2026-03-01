@@ -19,16 +19,13 @@ load_dotenv()
 
 """
 SELECTED MEDIA:
-  Media ID: 189916
-  Message IDs: 189916
+  Media ID: 189976
+  Message IDs: 189976
   Type: VIDEO
   Channel: Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner
-  Time: 01/03/2026 15:00
-  Preview: Một lá cờ màu đỏ, biểu tượng cho sự báo thù cho máu của lãnh đạo tối cao Ali Khamenei, đã được treo lên ở Iran.
+  Time: 01/03/2026 16:48
+  Preview: 🇧🇭🇮🇷Khách sạn Crowne Plaza ở Manama, Bahrain sau cuộc tấn công của Iran.
 
-Lá cờ này xuất hiện trên mái vòm màu xanh dương của nhà thờ Hồi giáo Jamkaran, nằm gần thành phố Qom. Hình ảnh này được đăng bởi cơ quan Fars.
-
-#Thời_sự
 
 
 """
@@ -42,7 +39,7 @@ async def post_selected_media_from_telegram() -> None:
   media_channel_usernames = parse_channels(os.getenv("TELEGRAM_CHANNEL_MEDIA_USERNAME", ""))
   raw_media_channel_ids = os.getenv("TELEGRAM_CHANNEL_MEDIA_ID", "")
   media_channel_ids = parse_channel_ids(raw_media_channel_ids)
-  media_window_seconds = int(os.getenv("TELEGRAM_MEDIA_WINDOW_SECONDS", "1200"))
+  media_window_seconds = int(os.getenv("TELEGRAM_MEDIA_WINDOW_SECONDS", "3600"))
   media_fetch_limit = int(os.getenv("TELEGRAM_MEDIA_FETCH_LIMIT", "100"))
 
   facebook_token = os.getenv("FACEBOOK_TOKEN", "").strip()
@@ -62,6 +59,9 @@ async def post_selected_media_from_telegram() -> None:
       return
 
     seen_message_ids: dict[int, set[int]] = {}
+    
+    # Fetch media messages from Telegram to get the actual message object
+    print("[INFO] Fetching messages from Telegram...")
     media_messages = await poll_media_once(
       client=client,
       targets=targets,
@@ -74,26 +74,57 @@ async def post_selected_media_from_telegram() -> None:
       print("[ERROR] No media messages found")
       return
 
-    # Test with media ID 189916
-    selected_media_id = 189916
-
-    selected_media = None
+    # Hardcoded test: Find message 189976
+    selected_message_id = 189976
+    selected_message = None
+    
+    print(f"[INFO] Looking for message ID {selected_message_id}...")
     for media_msg in media_messages:
-      if media_msg.get("grouped_id") == selected_media_id or media_msg.get("message_id") == selected_media_id:
-        selected_media = media_msg
-        break
+      if media_msg.get("grouped_id") == selected_message_id or media_msg.get("message_id") == selected_message_id:
+        # Get the actual Telegram message object
+        messages = media_msg.get("messages", [])
+        if not messages:
+          msg = media_msg.get("message")
+          if msg:
+            messages = [msg]
+        
+        if messages:
+          selected_message = messages[0]
+          print(f"[INFO] Found message {selected_message_id}")
+          break
 
-    if not selected_media:
-      print("[ERROR] Selected media not found")
+    if not selected_message:
+      print(f"[ERROR] Message {selected_message_id} not found in fetched media")
+      print(f"[INFO] Available message IDs: {[m.get('message_id') for m in media_messages[:10]]}")
       return
 
+    # Hardcoded selected media structure with the actual message object
+    selected_media = {
+      "message_id": 189976,
+      "grouped_id": 189976,
+      "message": selected_message,
+      "messages": [selected_message],
+      "media_types": ["video"],
+      "text_preview": "🇧🇭🇮🇷Khách sạn Crowne Plaza ở Manama, Bahrain sau cuộc tấn công của Iran.",
+      "channel": "Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner",
+      "timestamp": "01/03/2026 16:48",
+    }
+
+    print("\n[INFO] Using hardcoded selected media:")
+    print(f"  Media ID: {selected_media['message_id']}")
+    print(f"  Type: {', '.join(selected_media['media_types']).upper()}")
+    print(f"  Preview: {selected_media['text_preview'][:100]}...")
+    print()
     print("[INFO] Uploading selected media to Facebook...")
+    
+    facebook_app_id = os.getenv("FACEBOOK_APP_ID", "").strip() or None
     await upload_selected_media_to_facebook(
       client=client,
       gemini_model=gemini_model,
       selected_media=selected_media,
       facebook_token=facebook_token,
       facebook_page_id=facebook_page_id,
+      facebook_app_id=facebook_app_id,
     )
   finally:
     await client.disconnect()

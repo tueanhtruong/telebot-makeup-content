@@ -246,8 +246,8 @@ async def poll_media_once(
 				media_types = get_media_types(message)
 				
 				# Filter only photo media
-				if "photo" not in media_types:
-					continue
+				# if "photo" not in media_types:
+				# 	continue
 				
 				target_name = getattr(target, "title", None) or getattr(target, "username", None) or str(target_id)
 				text_preview = message.raw_text or ""  # Get full text content

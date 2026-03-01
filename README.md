@@ -94,6 +94,7 @@ The project includes a GitHub Actions workflow that automatically polls Telegram
    - `GEMINI_API_KEY` - Google Gemini API key for message summarization
    - `FACEBOOK_TOKEN` - Facebook page access token
    - `FACEBOOK_PAGE_ID` - Facebook page ID
+   - `FACEBOOK_APP_ID` - Facebook app ID (optional, enables Resumable Upload API for videos)
 
 3. **Create the Telegram Session File**
 
