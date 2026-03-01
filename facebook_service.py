@@ -64,7 +64,7 @@ def sanitize_facebook_message(model: object | None, text: str) -> str:
 
 Nhiệm vụ:
 • Hãy tìm những từ ngữ trong đoạn văn này có thể bị thuật toán Facebook quét là vi phạm tiêu chuẩn cộng đồng hoặc nhạy cảm và thay thế bằng từ phù hợp hơn
-• Hãy tóm tắt nội dung chính của đoạn văn này thành một đoạn văn ngắn gọn, có sự châm biếm, sắc sảo, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
+• Hãy tóm tắt nội dung chính của đoạn văn này thành một câu văn ngắn gọn, có sự châm biếm, sắc sảo, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
 • Loai bỏ tất cả các hashtag và không sử dụng bất kỳ ký tự đặc biệt nào khác ngoài dấu chấm câu cơ bản và dấu gạch ngang để phân tách các ý trong đoạn văn.
 • Ngôn ngữ Tiếng Việt
 
@@ -191,6 +191,7 @@ async def upload_media_to_facebook(
 	facebook_token: str,
 	facebook_page_id: str,
 	app_id: str | None = None,
+	description: str | None = None,
 	max_size: int = 20 * 1024 * 1024,
 ) -> str | None:
 	"""
@@ -257,7 +258,7 @@ async def upload_media_to_facebook(
 				print("[SKIP] Videos require FACEBOOK_APP_ID for Resumable Upload API. Set it in your .env file")
 				return None
 			
-			media_caption = getattr(message, "message", "") or ""
+			media_caption = (description or "") or (getattr(message, "message", "") or "")
 			video_id = await upload_video_to_facebook_resumable(
 				file_path=temp_path,
 				facebook_token=facebook_token,
@@ -386,6 +387,8 @@ async def upload_selected_media_to_facebook(
 		print("[ERROR] No messages found in selected_media")
 		return False
 	
+	text_preview = selected_media.get("text_preview", "")
+	sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
 	media_fbids = []
 	
 	# Process each message in the group (or single message)
@@ -396,6 +399,7 @@ async def upload_selected_media_to_facebook(
 			facebook_token=facebook_token,
 			facebook_page_id=facebook_page_id,
 			app_id=facebook_app_id,
+			description=sanitized_message,
 		)
 		
 		if media_fbid:
@@ -406,9 +410,6 @@ async def upload_selected_media_to_facebook(
 		return False
 	
 	# Create Facebook post with attached media
-	text_preview = selected_media.get("text_preview", "")
-	sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
-	
 	return create_facebook_post_with_media(
 		facebook_token=facebook_token,
 		facebook_page_id=facebook_page_id,

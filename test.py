@@ -4,7 +4,7 @@ import asyncio
 from dotenv import load_dotenv
 from telethon import TelegramClient
 
-from facebook_service import post_to_facebook
+from facebook_service import post_to_facebook, is_video_message
 from selection_action import upload_selected_media_to_facebook
 from selection_message_service import create_gemini_model
 from telegram_service import (
@@ -74,41 +74,31 @@ async def post_selected_media_from_telegram() -> None:
       print("[ERROR] No media messages found")
       return
 
-    # Hardcoded test: Find message 189976
-    selected_message_id = 189976
+    # Pick the last video media message from the fetched list
+    selected_media = None
     selected_message = None
-    
-    print(f"[INFO] Looking for message ID {selected_message_id}...")
-    for media_msg in media_messages:
-      if media_msg.get("grouped_id") == selected_message_id or media_msg.get("message_id") == selected_message_id:
-        # Get the actual Telegram message object
-        messages = media_msg.get("messages", [])
-        if not messages:
-          msg = media_msg.get("message")
-          if msg:
-            messages = [msg]
-        
-        if messages:
-          selected_message = messages[0]
-          print(f"[INFO] Found message {selected_message_id}")
-          break
+    for media_msg in reversed(media_messages):
+      messages = media_msg.get("messages", [])
+      if not messages:
+        msg = media_msg.get("message")
+        if msg:
+          messages = [msg]
 
-    if not selected_message:
-      print(f"[ERROR] Message {selected_message_id} not found in fetched media")
-      print(f"[INFO] Available message IDs: {[m.get('message_id') for m in media_messages[:10]]}")
+      if not messages:
+        continue
+
+      if is_video_message(messages[0]):
+        selected_message = messages[0]
+        selected_media = media_msg
+        break
+
+    if not selected_media or not selected_message:
+      print("[ERROR] No video media message found in fetched media")
       return
 
-    # Hardcoded selected media structure with the actual message object
-    selected_media = {
-      "message_id": 189976,
-      "grouped_id": 189976,
-      "message": selected_message,
-      "messages": [selected_message],
-      "media_types": ["video"],
-      "text_preview": "🇧🇭🇮🇷Khách sạn Crowne Plaza ở Manama, Bahrain sau cuộc tấn công của Iran.",
-      "channel": "Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner",
-      "timestamp": "01/03/2026 16:48",
-    }
+    # Ensure the selected media structure includes message fields
+    selected_media["message"] = selected_message
+    selected_media["messages"] = [selected_message]
 
     print("\n[INFO] Using hardcoded selected media:")
     print(f"  Media ID: {selected_media['message_id']}")
