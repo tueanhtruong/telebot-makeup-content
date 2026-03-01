@@ -48,7 +48,8 @@ Cấu trúc đầu ra (Output Format):
 ◦   ⚔️ Quân sự: Các điểm nhấn quan trọng nhất
 ◦   🏛️ Chính trị: Các biến động và hệ quả dự kiến
 ◦   📊 Kinh tế: Các chỉ số và tác động chiến lược
-4   ĐÁNH GIÁ RỦI RO: Dự báo ngắn về diễn biến tiếp theo.
+4   Đánh giá rủi ro: Dự báo ngắn về diễn biến tiếp theo.
+5   Thêm hashtag liên quan nếu có cho phù hợp với nội dung báo cáo, nhưng chỉ sử dụng các hashtag an toàn và phổ biến, tránh các hashtag có thể bị Facebook gắn cờ.
 
 Dữ liệu thô để xử lý:
 {joined_messages}"""

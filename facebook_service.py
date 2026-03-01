@@ -65,7 +65,8 @@ def sanitize_facebook_message(model: object | None, text: str) -> str:
 Nhiệm vụ:
 • Hãy tìm những từ ngữ trong đoạn văn này có thể bị thuật toán Facebook quét là vi phạm tiêu chuẩn cộng đồng hoặc nhạy cảm và thay thế bằng từ phù hợp hơn
 • Hãy tóm tắt nội dung chính của đoạn văn này thành một câu văn ngắn gọn, có sự châm biếm, sắc sảo, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
-• Loai bỏ tất cả các hashtag và không sử dụng bất kỳ ký tự đặc biệt nào khác ngoài dấu chấm câu cơ bản và dấu gạch ngang để phân tách các ý trong đoạn văn.
+• Chỉnh sửa các hashtag hiện tại nếu có hoặc thêm mới cho phù hợp với nội dung đã chỉnh sửa, nhưng chỉ sử dụng các hashtag an toàn và phổ biến, tránh các hashtag có thể bị Facebook gắn cờ.
+• Không sử dụng bất kỳ ký tự đặc biệt nào khác ngoài dấu chấm câu cơ bản và dấu gạch ngang để phân tách các ý trong đoạn văn.
 • Ngôn ngữ Tiếng Việt
 
 Yêu cầu bắt buộc:
