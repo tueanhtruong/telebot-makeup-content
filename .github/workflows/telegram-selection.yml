@@ -3,7 +3,8 @@ name: Telegram Selection and Post
 on:
   schedule:
     # Run every 15 minutes
-    - cron: "*/15 * * * *"
+    # - cron: "*/15 * * * *"
+    - cron: "0,15,30,45 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -53,5 +54,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
           FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
         run: |
           python selection_action.py
