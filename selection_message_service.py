@@ -10,7 +10,7 @@ def create_gemini_model() -> Optional[genai.GenerativeModel]:
 		return None
 
 	genai.configure(api_key=api_key)
-	return genai.GenerativeModel("gemini-2.5-flash-lite")
+	return genai.GenerativeModel("gemini-2.5-flash")
 
 
 def select_most_relevant_media(
@@ -53,7 +53,8 @@ def select_most_relevant_media(
 	
 	joined_media_messages = "\n\n".join(media_list)
 	
-	prompt = f"""Bạn là một hệ thống AI chuyên phân tích và so khớp tin nhắn. Nhiệm vụ của bạn là phân tích các tin nhắn văn bản và tin nhắn có media, sau đó xác định tin nhắn media nào phù hợp nhất với nội dung văn bản.
+	prompt = f"""
+	Bạn là một hệ thống AI chuyên phân tích và so khớp tin nhắn. Nhiệm vụ của bạn là phân tích các tin nhắn văn bản và tin nhắn có media, sau đó xác định tin nhắn media nào phù hợp nhất với nội dung văn bản.
 
 TIN NHẮN VĂN BẢN (từ kênh tổng hợp):
 {joined_text_messages}
@@ -75,6 +76,8 @@ Không được giải thích thêm, chỉ trả về SỐ hoặc "NONE".
 Lựa chọn của bạn:"""
 
 	try:
+		# print(prompt)  # Debug: Show the prompt being sent to Gemini
+
 		response = model.generate_content(prompt)
 		result = (getattr(response, "text", "") or "").strip()
 		
