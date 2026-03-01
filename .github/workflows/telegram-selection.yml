@@ -2,8 +2,8 @@ name: Telegram Selection and Post
 
 on:
   schedule:
-    # Run every 10 minutes
-    - cron: "*/10 * * * *"
+    # Run every 20 minutes
+    - cron: "*/20 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -48,7 +48,7 @@ jobs:
           TELEGRAM_FETCH_LIMIT: ${{ secrets.TELEGRAM_FETCH_LIMIT || '200' }}
           TELEGRAM_CHANNEL_MEDIA_USERNAME: ${{ secrets.TELEGRAM_CHANNEL_MEDIA_USERNAME }}
           TELEGRAM_CHANNEL_MEDIA_ID: ${{ secrets.TELEGRAM_CHANNEL_MEDIA_ID }}
-          TELEGRAM_MEDIA_WINDOW_SECONDS: ${{ secrets.TELEGRAM_MEDIA_WINDOW_SECONDS || '600' }}
+          TELEGRAM_MEDIA_WINDOW_SECONDS: ${{ secrets.TELEGRAM_MEDIA_WINDOW_SECONDS || '1200' }}
           TELEGRAM_MEDIA_FETCH_LIMIT: ${{ secrets.TELEGRAM_MEDIA_FETCH_LIMIT || '100' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
