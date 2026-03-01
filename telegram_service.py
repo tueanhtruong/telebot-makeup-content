@@ -141,6 +141,175 @@ async def poll_once(
 	return summary, len(poll_message_texts)
 
 
+def has_media(message: object) -> bool:
+	"""Check if a message contains media (photo, video, or other media types)."""
+	return bool(getattr(message, "media", None))
+
+
+def get_media_types(message: object) -> list[str]:
+	"""Extract all media types from a message. Returns list of media types."""
+	media_types = []
+	
+	# Check main message media
+	if hasattr(message, "media") and message.media:
+		media = message.media
+		
+		# Check for photo
+		if hasattr(media, "__class__"):
+			media_class_name = media.__class__.__name__
+			
+			if "Photo" in media_class_name:
+				media_types.append("photo")
+			elif "Document" in media_class_name:
+				# Check if document is video, audio, etc.
+				if hasattr(media, "document") and hasattr(media.document, "attributes"):
+					has_video = False
+					has_audio = False
+					for attr in media.document.attributes:
+						attr_name = attr.__class__.__name__
+						if "Video" in attr_name:
+							media_types.append("video")
+							has_video = True
+							break
+						elif "Audio" in attr_name:
+							media_types.append("audio")
+							has_audio = True
+							break
+					if not has_video and not has_audio:
+						media_types.append("document")
+				else:
+					media_types.append("document")
+			elif "Video" in media_class_name:
+				media_types.append("video")
+			elif "Audio" in media_class_name:
+				media_types.append("audio")
+			elif "Voice" in media_class_name:
+				media_types.append("voice")
+	
+	# Check for grouped media (albums)
+	if hasattr(message, "grouped_id") and message.grouped_id:
+		# Message is part of a media group/album
+		# The actual media types will be detected from the media field above
+		# but we can add additional context
+		if not media_types:
+			media_types.append("grouped_media")
+	
+	return media_types if media_types else ["unknown"]
+
+
+async def poll_media_once(
+	client: TelegramClient,
+	targets: list[object],
+	seen_message_ids: dict[int, set[int]],
+	window_seconds: int,
+	fetch_limit: int,
+) -> list[dict]:
+	"""Execute a single poll cycle for media messages and return list of media message info."""
+	window_start = datetime.now(timezone.utc) - timedelta(seconds=window_seconds)
+	media_messages: list[dict] = []
+	grouped_media: dict[int, dict] = {}  # Track grouped media by grouped_id
+
+	for target in targets:
+		try:
+			messages = await client.get_messages(target, limit=fetch_limit)
+		except Exception as error:
+			print(f"[WARN] get_messages failed for {getattr(target, 'id', 'unknown')}: {error}")
+			continue
+
+		if not messages:
+			continue
+
+		target_id = int(getattr(target, "id", 0) or 0)
+		if target_id not in seen_message_ids:
+			seen_message_ids[target_id] = set()
+
+		recent_messages = [
+			message
+			for message in reversed(messages)
+			if message.date and message.date >= window_start
+		]
+
+		new_messages = [
+			message
+			for message in recent_messages
+			if message.id and message.id not in seen_message_ids[target_id]
+		]
+
+		for message in new_messages:
+			seen_message_ids[target_id].add(message.id)
+			
+			# Check if message has media content
+			if has_media(message):
+				timestamp = message.date.astimezone().strftime("%d/%m/%Y %H:%M") if message.date else datetime.now().strftime("%d/%m/%Y %H:%M")
+				
+				# Get all media types in this message
+				media_types = get_media_types(message)
+				
+				target_name = getattr(target, "title", None) or getattr(target, "username", None) or str(target_id)
+				text_preview = (message.raw_text or "")[:100]  # First 100 chars as preview
+				
+				# Check if part of grouped media (album)
+				grouped_id = getattr(message, "grouped_id", None)
+				
+				if grouped_id:
+					# This message is part of a media group
+					if grouped_id not in grouped_media:
+						# Create new group entry
+						grouped_media[grouped_id] = {
+							"message_ids": [message.id],
+							"channel_id": target_id,
+							"channel_name": target_name,
+							"timestamp": timestamp,
+							"media_types": media_types.copy(),
+							"grouped_id": grouped_id,
+							"text_preview": text_preview,
+							"messages": [message],
+						}
+					else:
+						# Add to existing group
+						grouped_media[grouped_id]["message_ids"].append(message.id)
+						# Combine media types (avoid duplicates)
+						for media_type in media_types:
+							if media_type not in grouped_media[grouped_id]["media_types"]:
+								grouped_media[grouped_id]["media_types"].append(media_type)
+						grouped_media[grouped_id]["messages"].append(message)
+						# Update text_preview if current group has empty text but this message has text
+						if not grouped_media[grouped_id]["text_preview"] and text_preview:
+							grouped_media[grouped_id]["text_preview"] = text_preview
+				else:
+					# Individual media message (not grouped)
+					media_msg_info = {
+						"message_id": message.id,
+						"message_ids": [message.id],
+						"channel_id": target_id,
+						"channel_name": target_name,
+						"timestamp": timestamp,
+						"media_types": media_types,
+						"media_type": ", ".join(media_types),
+						"grouped_id": None,
+						"text_preview": text_preview,
+						"message": message,
+						"messages": [message],
+					}
+					media_messages.append(media_msg_info)
+					print(f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview}")
+
+		if len(seen_message_ids[target_id]) > 5000:
+			seen_message_ids[target_id] = set(sorted(seen_message_ids[target_id])[-2000:])
+
+	# Add all grouped media to the results
+	for grouped_id, group_info in grouped_media.items():
+		media_type_str = ", ".join(group_info["media_types"])
+		group_info["media_type"] = media_type_str
+		group_info["message_id"] = group_info["message_ids"][0]  # Use first message ID as primary
+		media_messages.append(group_info)
+		
+		print(f"[MEDIA GROUP] {group_info['timestamp']} {group_info['channel_name']} - "
+		      f"{media_type_str.upper()} [Album: {grouped_id}, {len(group_info['message_ids'])} items]: "
+		      f"{group_info['text_preview']}")
+
+	return media_messages
+
 
 async def poll_messages(
 	client: TelegramClient,

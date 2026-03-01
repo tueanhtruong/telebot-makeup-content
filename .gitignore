@@ -49,3 +49,6 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated files
+media_messages.json
