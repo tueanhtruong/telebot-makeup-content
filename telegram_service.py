@@ -245,8 +245,12 @@ async def poll_media_once(
 				# Get all media types in this message
 				media_types = get_media_types(message)
 				
+				# Filter only photo media
+				if "photo" not in media_types:
+					continue
+				
 				target_name = getattr(target, "title", None) or getattr(target, "username", None) or str(target_id)
-				text_preview = (message.raw_text or "")[:100]  # First 100 chars as preview
+				text_preview = message.raw_text or ""  # Get full text content
 				
 				# Check if part of grouped media (album)
 				grouped_id = getattr(message, "grouped_id", None)
@@ -292,21 +296,27 @@ async def poll_media_once(
 						"messages": [message],
 					}
 					media_messages.append(media_msg_info)
-					print(f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview}")
+					print(f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview[:100]}..." if len(text_preview) > 100 else f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview}")
 
 		if len(seen_message_ids[target_id]) > 5000:
 			seen_message_ids[target_id] = set(sorted(seen_message_ids[target_id])[-2000:])
 
 	# Add all grouped media to the results
 	for grouped_id, group_info in grouped_media.items():
+		# Filter only photo media groups
+		if "photo" not in group_info["media_types"]:
+			continue
+		
 		media_type_str = ", ".join(group_info["media_types"])
 		group_info["media_type"] = media_type_str
 		group_info["message_id"] = group_info["message_ids"][0]  # Use first message ID as primary
 		media_messages.append(group_info)
 		
+		preview_text = group_info['text_preview']
+		preview_display = f"{preview_text[:100]}..." if len(preview_text) > 100 else preview_text
 		print(f"[MEDIA GROUP] {group_info['timestamp']} {group_info['channel_name']} - "
 		      f"{media_type_str.upper()} [Album: {grouped_id}, {len(group_info['message_ids'])} items]: "
-		      f"{group_info['text_preview']}")
+		      f"{preview_display}")
 
 	return media_messages
 

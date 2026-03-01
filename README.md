@@ -140,17 +140,127 @@ The project includes a GitHub Actions workflow that automatically polls Telegram
 - ✅ Environment variable configuration
 - ✅ Support for Gemini AI integration
 - ✅ Support for Facebook API integration
+- ✅ Media message detection and grouping
+- ✅ Intelligent message selection using AI
+
+## Selection Message Service
+
+The **Selection Message Service** compares text messages from general channels with media messages from media channels, then uses Gemini AI to identify the most relevant media message.
+
+### How It Works
+
+1. **Fetches text messages** from `TELEGRAM_CHANNEL` within the last `TELEGRAM_WINDOW_SECONDS` (default: 3600 seconds / 1 hour)
+2. **Fetches media messages** from `TELEGRAM_CHANNEL_MEDIA` within the last `TELEGRAM_MEDIA_WINDOW_SECONDS` (default: 1200 seconds / 20 minutes)
+3. **Uses Gemini AI** to compare and select the most relevant media message
+
+### Running the Selection Service
+
+```bash
+python selection_action.py
+```
+
+### Environment Variables
+
+Add these to your `.env` file:
+
+```bash
+# Text Channel Configuration
+TELEGRAM_CHANNEL_USERNAMES=channel1,channel2
+TELEGRAM_CHANNEL_IDS=123456789
+TELEGRAM_WINDOW_SECONDS=3600
+
+# Media Channel Configuration
+TELEGRAM_CHANNEL_MEDIA_USERNAME=media_channel
+TELEGRAM_CHANNEL_MEDIA_ID=987654321
+TELEGRAM_MEDIA_WINDOW_SECONDS=1200
+TELEGRAM_MEDIA_FETCH_LIMIT=100
+
+# Gemini API (required for selection)
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+### Use Cases
+
+- 📰 **News Aggregation**: Match news text with relevant images/videos
+- 🎯 **Content Curation**: Find media that best represents text content
+- 🔗 **Cross-Channel Matching**: Link related content across different channels
+- 🤖 **Automated Content Selection**: Let AI choose the best visual for your content
+
+### Output
+
+The service provides:
+
+- Selected media message ID or grouped ID (for albums)
+- Media type (photo, video, document, etc.)
+- Channel information
+- Text preview
+- Timestamp
+
+## Media Action Service
+
+The **Media Action Service** specifically polls and tracks media messages (photos, videos, documents) from designated channels.
+
+### Running Media Action
+
+```bash
+python media_action.py
+```
+
+### Features
+
+- ✅ Detects all media types (photo, video, audio, document)
+- ✅ Groups album messages together
+- ✅ Saves results to JSON file for further processing
+- ✅ Provides statistics on media types
+
+### Environment Variables
+
+```bash
+TELEGRAM_CHANNEL_MEDIA_USERNAME=media_channel
+TELEGRAM_CHANNEL_MEDIA_ID=123456789
+TELEGRAM_MEDIA_WINDOW_SECONDS=1200
+TELEGRAM_MEDIA_FETCH_LIMIT=100
+```
+
+### Output File
+
+Media messages are saved to `media_messages.json` with structure:
+
+```json
+[
+  {
+    "message_id": 123,
+    "message_ids": [123, 124, 125],
+    "channel_id": 987654321,
+    "channel_name": "Media Channel",
+    "timestamp": "01/03/2026 10:30",
+    "media_types": ["photo", "video"],
+    "grouped_id": "6751234567890",
+    "is_grouped": true,
+    "group_item_count": 3,
+    "text_preview": "Caption text..."
+  }
+]
+```
 
 ## Project Structure
 
 ```
 TeleNotiApp/
-├── main.py                 # Main server application
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment variables template
-├── .gitignore             # Git ignore rules
-├── .copilot-instructions  # AI assistant instructions
-└── README.md              # This file
+├── main.py                          # Main server application (continuous polling)
+├── action.py                        # Single poll action for text messages
+├── media_action.py                  # Single poll action for media messages
+├── selection_action.py              # AI-powered media selection action
+├── telegram_service.py              # Telegram API service functions
+├── summary_service.py               # Gemini AI summarization service
+├── selection_message_service.py     # Gemini AI selection service
+├── facebook_service.py              # Facebook posting service
+├── requirements.txt                 # Python dependencies
+├── .env.example                     # Environment variables template
+├── .gitignore                       # Git ignore rules
+├── media_messages.json              # Output from media_action.py
+├── .copilot-instructions            # AI assistant instructions
+└── README.md                        # This file
 ```
 
 ## Future Modules

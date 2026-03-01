@@ -24,7 +24,6 @@ def post_to_facebook(message: str) -> bool:
 	payload = {
 		"access_token": token,
 		"message": message,
-		"published": "false",  # Create as unpublished/draft post
 	}
 
 	try:

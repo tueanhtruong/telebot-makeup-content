@@ -1,55 +1,118 @@
 # this file aim to test the facebook post function
 import os
+import asyncio
 from dotenv import load_dotenv
-from facebook_service import post_to_facebook   
+from telethon import TelegramClient
+
+from facebook_service import post_to_facebook
+from selection_action import upload_selected_media_to_facebook
+from selection_message_service import create_gemini_model
+from telegram_service import (
+  parse_channels,
+  parse_channel_ids,
+  get_required_env,
+  resolve_targets,
+  poll_media_once,
+)
 
 load_dotenv()
 
-content = f"""
+"""
+SELECTED MEDIA:
+  Media ID: 189916
+  Message IDs: 189916
+  Type: VIDEO
+  Channel: Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner
+  Time: 01/03/2026 15:00
+  Preview: Một lá cờ màu đỏ, biểu tượng cho sự báo thù cho máu của lãnh đạo tối cao Ali Khamenei, đã được treo lên ở Iran.
 
----
+Lá cờ này xuất hiện trên mái vòm màu xanh dương của nhà thờ Hồi giáo Jamkaran, nằm gần thành phố Qom. Hình ảnh này được đăng bởi cơ quan Fars.
 
-### **BÁO CÁO TÌNH HÌNH CHIẾN LƯỢC - KHU VỰC TRUNG ĐÔNG & CÁC TÁC ĐỘNG LAN TỎA**
+#Thời_sự
 
-**BLUF:** Căng thẳng leo thang tại Trung Đông đang gây ra những gián đoạn đáng kể về hậu cần và thương mại, cùng với những động thái ngoại giao gia tăng. Các lực lượng đối đầu có khả năng duy trì áp lực, trong khi các cường quốc khác tìm cách ổn định tình hình.
 
----
+"""
 
-### **CHI TIẾT PHÂN TÍCH:**
+async def post_selected_media_from_telegram() -> None:
+  """Fetch media from Telegram and upload the selected item to Facebook."""
+  api_id = int(get_required_env("TELEGRAM_API_ID"))
+  api_hash = get_required_env("TELEGRAM_API_HASH")
+  session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or "telethon_session"
 
-⚔️ **QUÂN SỰ:**
+  media_channel_usernames = parse_channels(os.getenv("TELEGRAM_CHANNEL_MEDIA_USERNAME", ""))
+  raw_media_channel_ids = os.getenv("TELEGRAM_CHANNEL_MEDIA_ID", "")
+  media_channel_ids = parse_channel_ids(raw_media_channel_ids)
+  media_window_seconds = int(os.getenv("TELEGRAM_MEDIA_WINDOW_SECONDS", "1200"))
+  media_fetch_limit = int(os.getenv("TELEGRAM_MEDIA_FETCH_LIMIT", "100"))
 
-*   **Tăng cường hành động quân sự:** Iran tuyên bố sẽ tăng cường độ hành động và coi các căn cứ, cơ sở của Mỹ và Israel là mục tiêu quân sự hợp pháp. Điều này cho thấy sự quyết tâm duy trì áp lực và có thể là mở rộng phạm vi tấn công.
-*   **Tấn công phi đối xứng và phòng thủ:** Iran cáo buộc Mỹ và Israel tấn công trường tiểu học, gây thương vong. Israel báo cáo hứng chịu mảnh vỡ tên lửa của Iran. Các vụ nổ được báo cáo tại nhiều địa điểm ở Iran, cho thấy hoạt động phòng không hoặc các cuộc tấn công trả đũa.
-*   **Cảnh báo đóng cửa eo biển:** Thông báo về việc đóng cửa Eo biển Hormuz, dù có thể không có giá trị pháp lý quốc tế nếu không được thực thi hợp pháp, cho thấy nỗ lực kiểm soát các tuyến đường thương mại chiến lược và tạo đòn bẩy địa chính trị.
-*   **Gián đoạn hàng không:** Nhiều hãng hàng không đã tạm dừng hoặc hủy bỏ đáng kể các chuyến bay đến và đi từ các quốc gia Trung Đông, cho thấy sự đánh giá rủi ro cao đối với các tuyến đường hàng không trong khu vực.
+  facebook_token = os.getenv("FACEBOOK_TOKEN", "").strip()
+  facebook_page_id = os.getenv("FACEBOOK_PAGE_ID", "").strip()
+  gemini_model = create_gemini_model()
+  if not facebook_token or not facebook_page_id:
+    print("[WARN] Missing FACEBOOK_TOKEN or FACEBOOK_PAGE_ID, skipping media upload")
+    return
 
-🏛️ **CHÍNH TRỊ:**
+  client = TelegramClient(session_name, api_id, api_hash)
+  await client.start()
 
-*   **Ngoại giao gia tăng:** Ngoại trưởng Nga Lavrov đã điện đàm với người đồng cấp Qatar, cả hai kêu gọi Mỹ, Israel và Iran quay lại các biện pháp chính trị và ngoại giao. Ấn Độ cũng liên lạc với Israel, nhắc lại lời kêu gọi xoa dịu căng thẳng thông qua đối thoại.
-*   **Lập trường quốc tế:** Đức khẳng định không tham gia vào các cuộc tấn công vào Iran, đồng thời cam kết hòa bình và an ninh khu vực, cũng như an ninh của Israel.
-*   **Quan ngại về chương trình hạt nhân:** Thủ tướng Đức Merz chỉ ra rằng Iran chưa đạt được một thỏa thuận hạt nhân toàn diện, đáng tin cậy và có thể kiểm chứng với Mỹ.
-*   **Nội bộ Mỹ:** Hạ viện Hoa Kỳ có thể tiếp tục họp để giải quyết các vấn đề về quyền lực chiến tranh và nghe báo cáo về Iran, cho thấy sự quan tâm và áp lực chính trị nội bộ đối với chính sách Trung Đông.
+  try:
+    targets = await resolve_targets(client, media_channel_usernames, media_channel_ids)
+    if not targets:
+      print("[ERROR] No valid media channel targets found")
+      return
 
-📊 **KINH TẾ:**
+    seen_message_ids: dict[int, set[int]] = {}
+    media_messages = await poll_media_once(
+      client=client,
+      targets=targets,
+      seen_message_ids=seen_message_ids,
+      window_seconds=media_window_seconds,
+      fetch_limit=media_fetch_limit,
+    )
 
-*   **Gián đoạn chuỗi cung ứng chiến lược:** Việc tạm dừng và hủy bỏ các chuyến bay đến các điểm nóng kinh tế và trung tâm trung chuyển ở Trung Đông cho thấy sự ảnh hưởng trực tiếp đến logistic và thương mại, có khả năng tác động đến giá cả hàng hóa và thời gian vận chuyển toàn cầu.
-*   **Cơ chế ứng phó khẩn cấp:** Các nền tảng du lịch khởi động cơ chế bảo đảm ứng phó khẩn cấp, cho phép hủy miễn phí các đặt phòng khách sạn và hỗ trợ thủ tục hoàn vé/đổi vé cho các chuyến bay bị ảnh hưởng. Điều này phản ánh rủi ro kinh doanh gia tăng và sự chủ động giảm thiểu thiệt hại.
-*   **Không có thông tin trực tiếp về dòng vốn, lạm phát hoặc lệnh trừng phạt:** Dữ liệu thô tập trung vào tác động tức thời của xung đột lên hoạt động kinh tế và thương mại, chứ không đi sâu vào các chỉ số kinh tế vĩ mô phức tạp.
+    if not media_messages:
+      print("[ERROR] No media messages found")
+      return
 
----
+    # Test with media ID 189916
+    selected_media_id = 189916
 
-### **ĐÁNH GIÁ RỦI RO (Risk Assessment):**
+    selected_media = None
+    for media_msg in media_messages:
+      if media_msg.get("grouped_id") == selected_media_id or media_msg.get("message_id") == selected_media_id:
+        selected_media = media_msg
+        break
 
-*   **Leo thang quân sự trực tiếp giữa Iran và Mỹ/Israel:** **Xác suất Cao, Tác động Rất Cao.** Các tuyên bố và hành động trả đũa lẫn nhau cho thấy khả năng đối đầu trực tiếp vẫn còn hiện hữu.
-*   **Gián đoạn thương mại kéo dài ở Eo biển Hormuz và các tuyến đường biển khác:** **Xác suất Trung bình, Tác động Cao.** Các nỗ lực kiểm soát hoặc phong tỏa các tuyến đường biển chiến lược có thể gây ra những biến động giá năng lượng và hàng hóa.
-*   **Tăng cường các nỗ lực ngoại giao và đàm phán:** **Xác suất Cao, Tác động Trung bình.** Các cường quốc khu vực và quốc tế đang nỗ lực tìm kiếm giải pháp hòa bình, có thể dẫn đến các cuộc đàm phán hoặc giảm nhiệt độ căng thẳng tạm thời.
+    if not selected_media:
+      print("[ERROR] Selected media not found")
+      return
 
----
+    print("[INFO] Uploading selected media to Facebook...")
+    await upload_selected_media_to_facebook(
+      client=client,
+      gemini_model=gemini_model,
+      selected_media=selected_media,
+      facebook_token=facebook_token,
+      facebook_page_id=facebook_page_id,
+    )
+  finally:
+    await client.disconnect()
 
-### **KẾT LUẬN:**
 
-Cục diện Trung Đông đang chứng kiến sự gia tăng bất ổn, với các động thái quân sự và phản ứng ngoại giao song hành, tiềm ẩn nguy cơ lan tỏa tác động lên các lĩnh vực kinh tế và chiến lược toàn cầu.
-========================================================================"""
+# Post selected media from Telegram (uses TELEGRAM_* and FACEBOOK_* env vars)
+asyncio.run(post_selected_media_from_telegram())
 
-post_to_facebook(content)
+
+"""
+SELECTED MEDIA:
+  Media ID: 189916
+  Message IDs: 189916
+  Type: VIDEO
+  Channel: Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner
+  Time: 01/03/2026 15:00
+  Preview: Một lá cờ màu đỏ, biểu tượng cho sự báo thù cho máu của lãnh đạo tối cao Ali Khamenei, đã được treo lên ở Iran.
+
+Lá cờ này xuất hiện trên mái vòm màu xanh dương của nhà thờ Hồi giáo Jamkaran, nằm gần thành phố Qom. Hình ảnh này được đăng bởi cơ quan Fars.
+
+#Thời_sự
+"""
