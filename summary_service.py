@@ -11,7 +11,7 @@ def create_gemini_model() -> Optional[genai.GenerativeModel]:
         return None
 
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-2.5-flash-lite")
+    return genai.GenerativeModel("gemini-2.5-flash")
 
 
 def summarize_messages(
@@ -34,14 +34,14 @@ Yêu cầu về nội dung:
 3   Phân tích Kinh tế: Tập trung vào dòng vốn, lạm phát, chuỗi cung ứng chiến lược và các lệnh trừng phạt/áp chế kinh tế.
 4   Có thể bỏ qua những thông tin không liên quan đến 3 phần trên
 5   Tuyệt đối không đưa ra lời khuyên đầu tư và nhận định, chỉ tóm tắt thông tin.
+6   Định dạng phù hợp với Facebook: Sử dụng bullet points, tiêu đề viết hoa, phân tách rõ ràng để dễ đọc trên di động, không dùng ký tự đặc biệt, chỉ hỗ trợ dấu - để phân tách các dòng
+7   Ngôn ngữ Tiếng Việt
 
 Tông giọng & Phong cách:
 •   Trung lập về quan điểm nhưng có sự châm biếm, sắc sảo (Cynical/Sarcastic).
-•   Định dạng phù hợp với Facebook: Sử dụng bullet points, tiêu đề viết hoa, phân tách rõ ràng để dễ đọc trên di động, không dùng ký tự đặc biệt, chỉ hỗ trợ dấu - để phân tách các dòng
 •   Nội dung trả lời chỉ bao gồm nội dung bài viết, không có câu hỏi nào thêm
 •   Sử dụng thuật ngữ chuyên môn: địa chính trị, lưỡng dụng, răn đe hạt nhân, phi đối xứng, quyền lực mềm…
 •   Hãy tìm những từ ngữ trong đoạn văn này có thể bị thuật toán Facebook quét là vi phạm tiêu chuẩn cộng đồng hoặc nhạy cảm và thay thế bằng từ phù hợp hơn
-•   Ngôn ngữ Tiếng Việt
 
 Cấu trúc đầu ra (Output Format):
 1   TIÊU ĐỀ BÁO CÁO - VIẾT HOA CÓ SỨC NẶNG

@@ -171,6 +171,7 @@ async def upload_video_to_facebook_resumable(
             "access_token": facebook_token,
             "title": title,
             "description": description,
+            "published": "true",  # Publish video immediately
         }
         
         res_finish = requests.post(url, data=finish_params).json()
@@ -363,8 +364,9 @@ async def upload_selected_media_to_facebook(
 	facebook_app_id: str | None = None,
 ) -> bool:
 	"""
-	Download media from Telegram if size < 20MB, upload to Facebook unpublished,
-	then create a post with the media and preview text.
+	Download media from Telegram and upload to Facebook.
+	Photos are uploaded together in one post.
+	Videos are published separately.
 	
 	Args:
 		client: Telegram client instance
@@ -390,30 +392,77 @@ async def upload_selected_media_to_facebook(
 	
 	text_preview = selected_media.get("text_preview", "")
 	sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
-	media_fbids = []
 	
-	# Process each message in the group (or single message)
+	# Separate videos and photos
+	video_messages = []
+	photo_messages = []
+	
 	for msg in messages:
-		media_fbid = await upload_media_to_facebook(
-			client=client,
-			message=msg,
-			facebook_token=facebook_token,
-			facebook_page_id=facebook_page_id,
-			app_id=facebook_app_id,
-			description=sanitized_message,
-		)
-		
-		if media_fbid:
-			media_fbids.append(media_fbid)
+		if is_video_message(msg):
+			video_messages.append(msg)
+		else:
+			photo_messages.append(msg)
 	
-	if not media_fbids:
+	print(f"[INFO] Found {len(photo_messages)} photo(s) and {len(video_messages)} video(s)")
+	
+	success_count = 0
+	
+	# Upload and post photos together if any
+	if photo_messages:
+		print(f"[PHOTOS] Uploading {len(photo_messages)} photo(s) as one post...")
+		photo_fbids = []
+		
+		for msg in photo_messages:
+			media_fbid = await upload_media_to_facebook(
+				client=client,
+				message=msg,
+				facebook_token=facebook_token,
+				facebook_page_id=facebook_page_id,
+				app_id=facebook_app_id,
+				description=sanitized_message,
+			)
+			
+			if media_fbid:
+				photo_fbids.append(media_fbid)
+		
+		if photo_fbids:
+			# Create Facebook post with all photos
+			photo_success = create_facebook_post_with_media(
+				facebook_token=facebook_token,
+				facebook_page_id=facebook_page_id,
+				message=sanitized_message,
+				media_fbids=photo_fbids,
+			)
+			if photo_success:
+				success_count += 1
+				print(f"[SUCCESS] Posted {len(photo_fbids)} photo(s) to Facebook")
+		else:
+			print("[WARN] No photos were successfully uploaded")
+	
+	# Upload and publish each video separately
+	if video_messages:
+		print(f"[VIDEOS] Publishing {len(video_messages)} video(s) separately...")
+		
+		for i, msg in enumerate(video_messages, 1):
+			print(f"[VIDEO {i}/{len(video_messages)}] Processing...")
+			video_id = await upload_media_to_facebook(
+				client=client,
+				message=msg,
+				facebook_token=facebook_token,
+				facebook_page_id=facebook_page_id,
+				app_id=facebook_app_id,
+				description=sanitized_message,
+			)
+			
+			if video_id:
+				success_count += 1
+				print(f"[SUCCESS] Published video {i}/{len(video_messages)} to Facebook (ID: {video_id})")
+			else:
+				print(f"[ERROR] Failed to upload video {i}/{len(video_messages)}")
+	
+	if success_count == 0:
 		print("[ERROR] No media items were successfully uploaded")
 		return False
 	
-	# Create Facebook post with attached media
-	return create_facebook_post_with_media(
-		facebook_token=facebook_token,
-		facebook_page_id=facebook_page_id,
-		message=sanitized_message,
-		media_fbids=media_fbids,
-	)
+	print(f"[COMPLETE] Successfully uploaded {success_count} item(s) to Facebook")
+	return True
