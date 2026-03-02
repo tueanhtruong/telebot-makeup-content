@@ -65,12 +65,11 @@ TIN NHẮN MEDIA (từ kênh media):
 YÊU CẦU:
 1. Phân tích ý nghĩa ngữ nghĩa của các tin nhắn văn bản
 2. So sánh với nội dung preview của từng tin nhắn media
-3. Chọn tin nhắn media PHÙ HỢP NHẤT hoặc liên quan nhất đến nội dung văn bản
-4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về số thử tự của media cuối cùng
-5. Nếu KHÔNG có media nào trả về "NONE"
+3. Chọn tin nhắn media PHÙ HỢP NHẤT hoặc liên quan nhất đến nội dung văn bản trả về số thứ tự của media
+4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về "NONE"
 
 ĐỊNH DẠNG TRẢ LỜI:
-Bạn CHỈ được trả về số thứ tự của media (ví dụ: "1", "2", "3", v.v.) hoặc "NONE".
+Bạn CHỈ được trả về số thứ tự của media (ví dụ: "1", "2", "3") hoặc "NONE".
 Không được giải thích thêm, chỉ trả về SỐ hoặc "NONE".
 
 Lựa chọn của bạn:"""
@@ -85,8 +84,8 @@ Lựa chọn của bạn:"""
 		
 		# Parse the response
 		if result.upper() == "NONE":
-			print("[SELECTION] Gemini found no relevant media message")
-			return None
+			print("[SELECTION] Gemini found no relevant media message, returning last media")
+			return media_messages[-1] if media_messages else None
 		
 		try:
 			selected_index = int(result) - 1  # Convert to 0-based index
@@ -97,11 +96,11 @@ Lựa chọn của bạn:"""
 				      f"Type={selected.get('media_type')}")
 				return selected
 			else:
-				print(f"[WARN] Gemini returned invalid index: {selected_index + 1}")
-				return None
+				print(f"[WARN] Gemini returned invalid index: {selected_index + 1}, returning last media")
+				return media_messages[-1] if media_messages else None
 		except ValueError:
-			print(f"[WARN] Gemini returned unparseable response: {result}")
-			return None
+			print(f"[WARN] Gemini returned unparseable response: {result}, returning last media")
+			return media_messages[-1] if media_messages else None
 			
 	except Exception as error:
 		print(f"[ERROR] Gemini selection error: {error}")
