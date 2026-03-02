@@ -3,7 +3,7 @@ import re
 import tempfile
 import requests
 import json
-from typing import Optional
+from typing import Any, Optional
 from telethon import TelegramClient
 from telethon.tl.types import DocumentAttributeVideo
 
@@ -11,6 +11,39 @@ from telethon.tl.types import DocumentAttributeVideo
 def get_facebook_token() -> Optional[str]:
 	token = os.getenv("FACEBOOK_TOKEN", "").strip()
 	return token if token else None
+
+
+def print_gemini_token_usage(
+	model: object | None,
+	prompt: str,
+	response: Any,
+	label: str,
+) -> None:
+	usage = getattr(response, "usage_metadata", None)
+	prompt_tokens = getattr(usage, "prompt_token_count", None) if usage else None
+	output_tokens = getattr(usage, "candidates_token_count", None) if usage else None
+	total_tokens = getattr(usage, "total_token_count", None) if usage else None
+
+	if any(value is not None for value in [prompt_tokens, output_tokens, total_tokens]):
+		print(
+			f"[TOKEN USAGE][{label}] "
+			f"prompt={prompt_tokens if prompt_tokens is not None else 'n/a'}, "
+			f"output={output_tokens if output_tokens is not None else 'n/a'}, "
+			f"total={total_tokens if total_tokens is not None else 'n/a'}"
+		)
+		return
+
+	if model is not None and hasattr(model, "count_tokens"):
+		try:
+			count_result = model.count_tokens(prompt)
+			estimated_prompt_tokens = getattr(count_result, "total_tokens", None)
+			if estimated_prompt_tokens is not None:
+				print(f"[TOKEN USAGE][{label}] prompt≈{estimated_prompt_tokens}, output=n/a, total=n/a")
+				return
+		except Exception:
+			pass
+
+	print(f"[TOKEN USAGE][{label}] unavailable")
 
 
 def post_to_facebook(message: str) -> bool:
@@ -43,7 +76,7 @@ def post_to_facebook(message: str) -> bool:
 		return False
 
 
-def sanitize_facebook_message(model: object | None, text: str) -> str:
+def sanitize_facebook_message(model: object | None, text: str, selection_text_context: str = "") -> str:
 	"""Remove hashtags and rewrite sensitive wording for Facebook safety using Gemini."""
 	if not text:
 		return ""
@@ -61,15 +94,12 @@ def sanitize_facebook_message(model: object | None, text: str) -> str:
 		return cleaned_text
 
 	prompt = f"""
-Bạn là trợ lý biên tập nội dung cho Facebook.
-
+Bạn là trợ lý biên tập nội dung cho Facebook, hãy tham khảo ngữ cảnh bên trên và thực hiện các nhiệm vụ sau:
 Nhiệm vụ:
 • Hãy tìm những từ ngữ trong đoạn văn này có thể bị thuật toán Facebook quét là vi phạm tiêu chuẩn cộng đồng hoặc nhạy cảm và thay thế bằng từ phù hợp hơn
-• Hãy tóm tắt nội dung chính của đoạn văn này thành một đoạn văn ngắn gọn, đủ ý, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
 • Chỉnh sửa các hashtag hiện tại nếu có hoặc thêm mới cho phù hợp với nội dung đã chỉnh sửa, nhưng chỉ sử dụng các hashtag an toàn và phổ biến, tránh các hashtag có thể bị Facebook gắn cờ.
 • Không sử dụng bất kỳ ký tự đặc biệt nào khác ngoài dấu chấm câu cơ bản và dấu gạch ngang để phân tách các ý trong đoạn văn.
 • Ngôn ngữ Tiếng Việt
-
 Yêu cầu bắt buộc:
 - Chỉ trả về đúng đoạn văn đã chỉnh sửa.
 - Không thêm giải thích, không thêm nhãn, không thêm tiêu đề.
@@ -79,8 +109,22 @@ Yêu cầu bắt buộc:
 """
 
 	try:
+		print("\n" + "="*72)
+		print("AI MODEL PROMPT (SANITIZE):")
+		print("="*72)
+		print(prompt)
+		print("="*72 + "\n")
+		
 		response = model.generate_content(prompt)
 		sanitized_text = (getattr(response, "text", "") or "").strip()
+		print_gemini_token_usage(model, prompt, response, "SANITIZE")
+		
+		print("\n" + "="*72)
+		print("AI MODEL RAW RESPONSE (SANITIZE):")
+		print("="*72)
+		print(sanitized_text)
+		print("="*72 + "\n")
+		
 		if not sanitized_text:
 			print("[WARN] Gemini returned empty sanitized text, using hashtag-removed text")
 			return cleaned_text
@@ -404,7 +448,12 @@ async def upload_selected_media_to_facebook(
 		
 		# Get and sanitize text preview for this specific media item
 		text_preview = selected_media.get("text_preview", "")
-		sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
+		selection_text_context = selected_media.get("selection_text_context", "")
+		sanitized_message = sanitize_facebook_message(
+			gemini_model,
+			text_preview,
+			selection_text_context=selection_text_context,
+		)
 		
 		# Separate videos and photos within this media item
 		video_messages = []

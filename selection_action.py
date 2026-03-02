@@ -32,7 +32,7 @@ single_text_channel_id = os.getenv("TELEGRAM_CHANNEL_ID", "").strip()
 if single_text_channel_id:
 	raw_text_channel_ids = f"{raw_text_channel_ids},{single_text_channel_id}" if raw_text_channel_ids else single_text_channel_id
 text_channel_ids = parse_channel_ids(raw_text_channel_ids)
-text_window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "3600"))
+text_window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "2400"))
 text_fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "200"))
 
 # Media channel configuration

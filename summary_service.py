@@ -1,8 +1,41 @@
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import google.generativeai as genai
+
+
+def print_gemini_token_usage(
+    model: Optional[genai.GenerativeModel],
+    prompt: str,
+    response: Any,
+    label: str,
+) -> None:
+    usage = getattr(response, "usage_metadata", None)
+    prompt_tokens = getattr(usage, "prompt_token_count", None) if usage else None
+    output_tokens = getattr(usage, "candidates_token_count", None) if usage else None
+    total_tokens = getattr(usage, "total_token_count", None) if usage else None
+
+    if any(value is not None for value in [prompt_tokens, output_tokens, total_tokens]):
+        print(
+            f"[TOKEN USAGE][{label}] "
+            f"prompt={prompt_tokens if prompt_tokens is not None else 'n/a'}, "
+            f"output={output_tokens if output_tokens is not None else 'n/a'}, "
+            f"total={total_tokens if total_tokens is not None else 'n/a'}"
+        )
+        return
+
+    if model is not None:
+        try:
+            count_result = model.count_tokens(prompt)
+            estimated_prompt_tokens = getattr(count_result, "total_tokens", None)
+            if estimated_prompt_tokens is not None:
+                print(f"[TOKEN USAGE][{label}] prompt≈{estimated_prompt_tokens}, output=n/a, total=n/a")
+                return
+        except Exception:
+            pass
+
+    print(f"[TOKEN USAGE][{label}] unavailable")
 
 
 def create_gemini_model() -> Optional[genai.GenerativeModel]:
@@ -55,8 +88,22 @@ Dữ liệu thô để xử lý:
 {joined_messages}"""
 
     try:
+        print("\n" + "="*72)
+        print("AI MODEL PROMPT:")
+        print("="*72)
+        print(prompt)
+        print("="*72 + "\n")
+        
         response = model.generate_content(prompt)
         text = (getattr(response, "text", "") or "").strip()
+        print_gemini_token_usage(model, prompt, response, "SUMMARY")
+        
+        print("\n" + "="*72)
+        print("AI MODEL RAW RESPONSE:")
+        print("="*72)
+        print(text)
+        print("="*72 + "\n")
+        
         if text:
             return text
         return "Gemini returned an empty summary."

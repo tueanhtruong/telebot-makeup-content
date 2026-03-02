@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Optional
+from typing import Any, Optional
 import google.generativeai as genai
 
 
@@ -12,6 +12,39 @@ def create_gemini_model() -> Optional[genai.GenerativeModel]:
 
 	genai.configure(api_key=api_key)
 	return genai.GenerativeModel("gemini-3-flash-preview")
+
+
+def print_gemini_token_usage(
+	model: Optional[genai.GenerativeModel],
+	prompt: str,
+	response: Any,
+	label: str,
+) -> None:
+	usage = getattr(response, "usage_metadata", None)
+	prompt_tokens = getattr(usage, "prompt_token_count", None) if usage else None
+	output_tokens = getattr(usage, "candidates_token_count", None) if usage else None
+	total_tokens = getattr(usage, "total_token_count", None) if usage else None
+
+	if any(value is not None for value in [prompt_tokens, output_tokens, total_tokens]):
+		print(
+			f"[TOKEN USAGE][{label}] "
+			f"prompt={prompt_tokens if prompt_tokens is not None else 'n/a'}, "
+			f"output={output_tokens if output_tokens is not None else 'n/a'}, "
+			f"total={total_tokens if total_tokens is not None else 'n/a'}"
+		)
+		return
+
+	if model is not None:
+		try:
+			count_result = model.count_tokens(prompt)
+			estimated_prompt_tokens = getattr(count_result, "total_tokens", None)
+			if estimated_prompt_tokens is not None:
+				print(f"[TOKEN USAGE][{label}] prompt≈{estimated_prompt_tokens}, output=n/a, total=n/a")
+				return
+		except Exception:
+			pass
+
+	print(f"[TOKEN USAGE][{label}] unavailable")
 
 
 def select_most_relevant_media(
@@ -76,24 +109,44 @@ Không được giải thích thêm, chỉ trả về SỐ hoặc NONE.
 Lựa chọn của bạn:"""
 
 	try:
-		# print(prompt)  # Debug: Show the prompt being sent to Gemini
-
+		print("\n" + "="*72)
+		print("AI MODEL PROMPT (SELECTION):")
+		print("="*72)
+		print(prompt)
+		print("="*72 + "\n")
+		
 		response = model.generate_content(prompt)
 		result = (getattr(response, "text", "") or "").strip()
+		print_gemini_token_usage(model, prompt, response, "SELECTION")
+		
+		print("\n" + "="*72)
+		print("AI MODEL RAW RESPONSE (SELECTION):")
+		print("="*72)
+		print(result)
+		print("="*72 + "\n")
+		
 		
 		print(f"[GEMINI SELECTION] Raw response: {result}")
 		
 		# Parse the response using regex to extract all numeric indices
 		if result.upper() == "NONE":
 			print("[SELECTION] Gemini found no relevant media message, returning last media")
-			return [media_messages[-1]] if media_messages else None
+			if not media_messages:
+				return None
+			fallback_media = dict(media_messages[-1])
+			fallback_media["selection_text_context"] = joined_text_messages
+			return [fallback_media]
 		
 		# Use regex to find all numeric indices in the response
 		indices_matches = re.findall(r'\d+', result)
 		
 		if not indices_matches:
 			print(f"[WARN] Gemini returned no numeric indices: {result}, returning last media")
-			return [media_messages[-1]] if media_messages else None
+			if not media_messages:
+				return None
+			fallback_media = dict(media_messages[-1])
+			fallback_media["selection_text_context"] = joined_text_messages
+			return [fallback_media]
 		
 		# Convert to integers and keep only distinct ones
 		selected_indices = sorted(set(int(idx) for idx in indices_matches))
@@ -104,7 +157,8 @@ Lựa chọn của bạn:"""
 		for idx in selected_indices:
 			media_idx = idx - 1  # Convert to 0-based index
 			if 0 <= media_idx < len(media_messages):
-				selected = media_messages[media_idx]
+				selected = dict(media_messages[media_idx])
+				selected["selection_text_context"] = joined_text_messages
 				selected_medias.append(selected)
 				print(f"[SELECTION] Selected media #{idx}: "
 				      f"ID={selected.get('grouped_id') or selected.get('message_id')}, "
@@ -114,7 +168,11 @@ Lựa chọn của bạn:"""
 		
 		if not selected_medias:
 			print("[SELECTION] No valid media indices found, returning last media")
-			return [media_messages[-1]] if media_messages else None
+			if not media_messages:
+				return None
+			fallback_media = dict(media_messages[-1])
+			fallback_media["selection_text_context"] = joined_text_messages
+			return [fallback_media]
 		
 		return selected_medias
 			

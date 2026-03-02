@@ -129,7 +129,6 @@ async def poll_once(
 		for message in new_messages:
 			timestamp = message.date.astimezone().strftime("%d/%m/%Y %H:%M") if message.date else datetime.now().strftime("%d/%m/%Y %H:%M")
 			content = message.raw_text or ""
-			print(f"{timestamp} {content}")
 			poll_message_texts.append(content)
 			seen_message_ids[target_id].add(message.id)
 
@@ -296,7 +295,7 @@ async def poll_media_once(
 						"messages": [message],
 					}
 					media_messages.append(media_msg_info)
-					print(f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview[:100]}..." if len(text_preview) > 100 else f"[MEDIA] {timestamp} {target_name} - {', '.join(media_types).upper()}: {text_preview}")
+
 
 		if len(seen_message_ids[target_id]) > 5000:
 			seen_message_ids[target_id] = set(sorted(seen_message_ids[target_id])[-2000:])
@@ -311,12 +310,6 @@ async def poll_media_once(
 		group_info["media_type"] = media_type_str
 		group_info["message_id"] = group_info["message_ids"][0]  # Use first message ID as primary
 		media_messages.append(group_info)
-		
-		preview_text = group_info['text_preview']
-		preview_display = f"{preview_text[:100]}..." if len(preview_text) > 100 else preview_text
-		print(f"[MEDIA GROUP] {group_info['timestamp']} {group_info['channel_name']} - "
-		      f"{media_type_str.upper()} [Album: {grouped_id}, {len(group_info['message_ids'])} items]: "
-		      f"{preview_display}")
 
 	return media_messages
 
