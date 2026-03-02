@@ -123,17 +123,3 @@ async def post_selected_media_from_telegram() -> None:
 # Post selected media from Telegram (uses TELEGRAM_* and FACEBOOK_* env vars)
 asyncio.run(post_selected_media_from_telegram())
 
-
-"""
-SELECTED MEDIA:
-  Media ID: 189916
-  Message IDs: 189916
-  Type: VIDEO
-  Channel: Quán Tin | Kênh Thông tin chính trị quốc tế | Vietnam Information Corner
-  Time: 01/03/2026 15:00
-  Preview: Một lá cờ màu đỏ, biểu tượng cho sự báo thù cho máu của lãnh đạo tối cao Ali Khamenei, đã được treo lên ở Iran.
-
-Lá cờ này xuất hiện trên mái vòm màu xanh dương của nhà thờ Hồi giáo Jamkaran, nằm gần thành phố Qom. Hình ảnh này được đăng bởi cơ quan Fars.
-
-#Thời_sự
-"""

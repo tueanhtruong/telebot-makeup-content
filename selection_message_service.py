@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Optional
 import google.generativeai as genai
 
@@ -10,16 +11,16 @@ def create_gemini_model() -> Optional[genai.GenerativeModel]:
 		return None
 
 	genai.configure(api_key=api_key)
-	return genai.GenerativeModel("gemini-2.5-flash")
+	return genai.GenerativeModel("gemini-3-flash-preview")
 
 
 def select_most_relevant_media(
 	model: Optional[genai.GenerativeModel],
 	text_messages: list[str],
 	media_messages: list[dict],
-) -> Optional[dict]:
+) -> Optional[list[dict]]:
 	"""
-	Compare text messages with media messages and return the most relevant media message.
+	Compare text messages with media messages and return all relevant media messages.
 	
 	Args:
 		model: Gemini model instance
@@ -27,7 +28,7 @@ def select_most_relevant_media(
 		media_messages: List of media message dictionaries with text_preview, message_id, grouped_id, etc.
 	
 	Returns:
-		The most relevant media message dict, or None if no match found
+		A list of relevant media message dicts, or None if no match found
 	"""
 	if not text_messages or not media_messages:
 		return None
@@ -69,8 +70,8 @@ YÊU CẦU:
 4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về "NONE"
 
 ĐỊNH DẠNG TRẢ LỜI:
-Bạn CHỈ được trả về số thứ tự của media (ví dụ: "1", "2", "3") hoặc "NONE".
-Không được giải thích thêm, chỉ trả về SỐ hoặc "NONE".
+Bạn CHỈ được trả về số thứ tự của media ví dụ: 1, 2, 3 hoặc NONE.
+Không được giải thích thêm, chỉ trả về SỐ hoặc NONE.
 
 Lựa chọn của bạn:"""
 
@@ -82,32 +83,47 @@ Lựa chọn của bạn:"""
 		
 		print(f"[GEMINI SELECTION] Raw response: {result}")
 		
-		# Parse the response
+		# Parse the response using regex to extract all numeric indices
 		if result.upper() == "NONE":
 			print("[SELECTION] Gemini found no relevant media message, returning last media")
-			return media_messages[-1] if media_messages else None
+			return [media_messages[-1]] if media_messages else None
 		
-		try:
-			selected_index = int(result) - 1  # Convert to 0-based index
-			if 0 <= selected_index < len(media_messages):
-				selected = media_messages[selected_index]
-				print(f"[SELECTION] Gemini selected media #{selected_index + 1}: "
+		# Use regex to find all numeric indices in the response
+		indices_matches = re.findall(r'\d+', result)
+		
+		if not indices_matches:
+			print(f"[WARN] Gemini returned no numeric indices: {result}, returning last media")
+			return [media_messages[-1]] if media_messages else None
+		
+		# Convert to integers and keep only distinct ones
+		selected_indices = sorted(set(int(idx) for idx in indices_matches))
+		print(f"[SELECTION] Extracted indices from response: {selected_indices}")
+		
+		# Filter valid indices and collect corresponding media messages
+		selected_medias = []
+		for idx in selected_indices:
+			media_idx = idx - 1  # Convert to 0-based index
+			if 0 <= media_idx < len(media_messages):
+				selected = media_messages[media_idx]
+				selected_medias.append(selected)
+				print(f"[SELECTION] Selected media #{idx}: "
 				      f"ID={selected.get('grouped_id') or selected.get('message_id')}, "
 				      f"Type={selected.get('media_type')}")
-				return selected
 			else:
-				print(f"[WARN] Gemini returned invalid index: {selected_index + 1}, returning last media")
-				return media_messages[-1] if media_messages else None
-		except ValueError:
-			print(f"[WARN] Gemini returned unparseable response: {result}, returning last media")
-			return media_messages[-1] if media_messages else None
+				print(f"[WARN] Invalid index {idx} (out of range)")
+		
+		if not selected_medias:
+			print("[SELECTION] No valid media indices found, returning last media")
+			return [media_messages[-1]] if media_messages else None
+		
+		return selected_medias
 			
 	except Exception as error:
 		print(f"[ERROR] Gemini selection error: {error}")
 		return None
 
 
-def format_selection_result(text_message_count: int, media_message_count: int, selected_media: Optional[dict]) -> str:
+def format_selection_result(text_message_count: int, media_message_count: int, selected_medias: Optional[list[dict]]) -> str:
 	"""Format selection results for display."""
 	border = "=" * 72
 	result = [
@@ -119,26 +135,28 @@ def format_selection_result(text_message_count: int, media_message_count: int, s
 		f"{border}",
 	]
 	
-	if selected_media:
-		media_id = selected_media.get("grouped_id") or selected_media.get("message_id")
-		media_type = selected_media.get("media_type", "unknown")
-		channel_name = selected_media.get("channel_name", "unknown")
-		timestamp = selected_media.get("timestamp", "")
-		text_preview = selected_media.get("text_preview", "")
-		message_ids = selected_media.get("message_ids", [])
+	if selected_medias:
+		result.append(f"SELECTED MEDIA: {len(selected_medias)} item(s)")
 		
-		result.extend([
-			"SELECTED MEDIA:",
-			f"  Media ID: {media_id}",
-			f"  Message IDs: {', '.join(map(str, message_ids))}",
-			f"  Type: {media_type.upper()}",
-			f"  Channel: {channel_name}",
-			f"  Time: {timestamp}",
-			f"  Preview: {text_preview}",
-		])
-		
-		if selected_media.get("grouped_id"):
-			result.append(f"  Album: {len(message_ids)} items in group")
+		for i, selected_media in enumerate(selected_medias, 1):
+			media_id = selected_media.get("grouped_id") or selected_media.get("message_id")
+			media_type = selected_media.get("media_type", "unknown")
+			channel_name = selected_media.get("channel_name", "unknown")
+			timestamp = selected_media.get("timestamp", "")
+			text_preview = selected_media.get("text_preview", "")
+			message_ids = selected_media.get("message_ids", [])
+			
+			result.extend([
+				f"  [{i}] Media ID: {media_id}",
+				f"      Message IDs: {', '.join(map(str, message_ids))}",
+				f"      Type: {media_type.upper()}",
+				f"      Channel: {channel_name}",
+				f"      Time: {timestamp}",
+				f"      Preview: {text_preview}",
+			])
+			
+			if selected_media.get("grouped_id"):
+				result.append(f"      Album: {len(message_ids)} items in group")
 	else:
 		result.append("NO RELEVANT MEDIA FOUND")
 	

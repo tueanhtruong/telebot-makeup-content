@@ -358,20 +358,21 @@ def create_facebook_post_with_media(
 async def upload_selected_media_to_facebook(
 	client: TelegramClient,
 	gemini_model: object | None,
-	selected_media: dict,
+	selected_medias: list[dict],
 	facebook_token: str,
 	facebook_page_id: str,
 	facebook_app_id: str | None = None,
 ) -> bool:
 	"""
 	Download media from Telegram and upload to Facebook.
+	Each selected media item is uploaded separately with its own text preview.
 	Photos are uploaded together in one post.
 	Videos are published separately.
 	
 	Args:
 		client: Telegram client instance
 		gemini_model: Gemini model for text sanitization
-		selected_media: Selected media dict from select_most_relevant_media
+		selected_medias: List of selected media dicts from select_most_relevant_media
 		facebook_token: Facebook page access token
 		facebook_page_id: Facebook page ID
 		facebook_app_id: Facebook app ID (optional, enables Resumable Upload API for videos)
@@ -379,90 +380,108 @@ async def upload_selected_media_to_facebook(
 	Returns:
 		True if successful, False otherwise
 	"""
-	# Get messages list
-	messages = selected_media.get("messages", [])
-	if not messages:
-		message = selected_media.get("message")
-		if message:
-			messages = [message]
-	
-	if not messages:
-		print("[ERROR] No messages found in selected_media")
+	if not selected_medias:
+		print("[ERROR] No selected media provided")
 		return False
 	
-	text_preview = selected_media.get("text_preview", "")
-	sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
+	total_success_count = 0
 	
-	# Separate videos and photos
-	video_messages = []
-	photo_messages = []
-	
-	for msg in messages:
-		if is_video_message(msg):
-			video_messages.append(msg)
-		else:
-			photo_messages.append(msg)
-	
-	print(f"[INFO] Found {len(photo_messages)} photo(s) and {len(video_messages)} video(s)")
-	
-	success_count = 0
-	
-	# Upload and post photos together if any
-	if photo_messages:
-		print(f"[PHOTOS] Uploading {len(photo_messages)} photo(s) as one post...")
-		photo_fbids = []
+	# Process each selected media item separately
+	for media_idx, selected_media in enumerate(selected_medias, 1):
+		print(f"\n[MEDIA {media_idx}/{len(selected_medias)}] Processing selected media item...")
 		
-		for msg in photo_messages:
-			media_fbid = await upload_media_to_facebook(
-				client=client,
-				message=msg,
-				facebook_token=facebook_token,
-				facebook_page_id=facebook_page_id,
-				app_id=facebook_app_id,
-				description=sanitized_message,
-			)
-			
-			if media_fbid:
-				photo_fbids.append(media_fbid)
+		# Get messages from this media item
+		messages = selected_media.get("messages", [])
+		if not messages:
+			message = selected_media.get("message")
+			if message:
+				messages = [message]
 		
-		if photo_fbids:
-			# Create Facebook post with all photos
-			photo_success = create_facebook_post_with_media(
-				facebook_token=facebook_token,
-				facebook_page_id=facebook_page_id,
-				message=sanitized_message,
-				media_fbids=photo_fbids,
-			)
-			if photo_success:
-				success_count += 1
-				print(f"[SUCCESS] Posted {len(photo_fbids)} photo(s) to Facebook")
-		else:
-			print("[WARN] No photos were successfully uploaded")
-	
-	# Upload and publish each video separately
-	if video_messages:
-		print(f"[VIDEOS] Publishing {len(video_messages)} video(s) separately...")
+		if not messages:
+			print("[WARN] No messages found in this media item, skipping")
+			continue
 		
-		for i, msg in enumerate(video_messages, 1):
-			print(f"[VIDEO {i}/{len(video_messages)}] Processing...")
-			video_id = await upload_media_to_facebook(
-				client=client,
-				message=msg,
-				facebook_token=facebook_token,
-				facebook_page_id=facebook_page_id,
-				app_id=facebook_app_id,
-				description=sanitized_message,
-			)
-			
-			if video_id:
-				success_count += 1
-				print(f"[SUCCESS] Published video {i}/{len(video_messages)} to Facebook (ID: {video_id})")
+		# Get and sanitize text preview for this specific media item
+		text_preview = selected_media.get("text_preview", "")
+		sanitized_message = sanitize_facebook_message(gemini_model, text_preview)
+		
+		# Separate videos and photos within this media item
+		video_messages = []
+		photo_messages = []
+		
+		for msg in messages:
+			if is_video_message(msg):
+				video_messages.append(msg)
 			else:
-				print(f"[ERROR] Failed to upload video {i}/{len(video_messages)}")
+				photo_messages.append(msg)
+		
+		print(f"[MEDIA {media_idx}] Found {len(photo_messages)} photo(s) and {len(video_messages)} video(s)")
+		
+		success_count = 0
+		
+		# Upload and post photos together if any
+		if photo_messages:
+			print(f"[MEDIA {media_idx}] Uploading {len(photo_messages)} photo(s) as one post...")
+			photo_fbids = []
+			
+			for msg in photo_messages:
+				media_fbid = await upload_media_to_facebook(
+					client=client,
+					message=msg,
+					facebook_token=facebook_token,
+					facebook_page_id=facebook_page_id,
+					app_id=facebook_app_id,
+					description=sanitized_message,
+				)
+				
+				if media_fbid:
+					photo_fbids.append(media_fbid)
+			
+			if photo_fbids:
+				# Create Facebook post with all photos from this media item
+				photo_success = create_facebook_post_with_media(
+					facebook_token=facebook_token,
+					facebook_page_id=facebook_page_id,
+					message=sanitized_message,
+					media_fbids=photo_fbids,
+				)
+				if photo_success:
+					success_count += 1
+					total_success_count += 1
+					print(f"[MEDIA {media_idx}] Successfully posted {len(photo_fbids)} photo(s) to Facebook")
+			else:
+				print(f"[MEDIA {media_idx}] No photos were successfully uploaded")
+		
+		# Upload and publish each video separately
+		if video_messages:
+			print(f"[MEDIA {media_idx}] Publishing {len(video_messages)} video(s) separately...")
+			
+			for i, msg in enumerate(video_messages, 1):
+				print(f"[MEDIA {media_idx}] Video {i}/{len(video_messages)} processing...")
+				video_id = await upload_media_to_facebook(
+					client=client,
+					message=msg,
+					facebook_token=facebook_token,
+					facebook_page_id=facebook_page_id,
+					app_id=facebook_app_id,
+					description=sanitized_message,
+				)
+				
+				if video_id:
+					success_count += 1
+					total_success_count += 1
+					print(f"[MEDIA {media_idx}] Successfully published video {i}/{len(video_messages)} to Facebook (ID: {video_id})")
+				else:
+					print(f"[MEDIA {media_idx}] Failed to upload video {i}/{len(video_messages)}")
+		
+		if success_count > 0:
+			print(f"[MEDIA {media_idx}] Completed: uploaded {success_count} item(s)")
+		else:
+			print(f"[MEDIA {media_idx}] Failed: no media items were successfully uploaded")
 	
-	if success_count == 0:
-		print("[ERROR] No media items were successfully uploaded")
+	if total_success_count == 0:
+		print("[ERROR] No media items were successfully uploaded across all selections")
 		return False
 	
-	print(f"[COMPLETE] Successfully uploaded {success_count} item(s) to Facebook")
+	print(f"\n[COMPLETE] Successfully uploaded {total_success_count} item(s) to Facebook across {len(selected_medias)} media selection(s)")
 	return True

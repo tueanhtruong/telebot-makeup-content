@@ -161,7 +161,7 @@ async def main() -> None:
 
 	# Select most relevant media
 	print("\nSelecting most relevant media using Gemini AI...")
-	selected_media = select_most_relevant_media(
+	selected_medias = select_most_relevant_media(
 		model=gemini_model,
 		text_messages=text_messages,
 		media_messages=media_messages,
@@ -171,12 +171,12 @@ async def main() -> None:
 	result = format_selection_result(
 		text_message_count=len(text_messages),
 		media_message_count=len(media_messages),
-		selected_media=selected_media,
+		selected_medias=selected_medias,
 	)
 	print(result)
 
 	# Upload to Facebook if media was selected and credentials are available
-	if selected_media:
+	if selected_medias:
 		facebook_token = os.getenv("FACEBOOK_TOKEN", "").strip()
 		facebook_page_id = os.getenv("FACEBOOK_PAGE_ID", "").strip()
 		facebook_app_id = os.getenv("FACEBOOK_APP_ID", "").strip() or None
@@ -190,7 +190,7 @@ async def main() -> None:
 			success = await upload_selected_media_to_facebook(
 				client=client,
 				gemini_model=gemini_model,
-				selected_media=selected_media,
+				selected_medias=selected_medias,
 				facebook_token=facebook_token,
 				facebook_page_id=facebook_page_id,
 				facebook_app_id=facebook_app_id,

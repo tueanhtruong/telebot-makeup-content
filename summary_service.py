@@ -11,7 +11,7 @@ def create_gemini_model() -> Optional[genai.GenerativeModel]:
         return None
 
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-2.5-flash")
+    return genai.GenerativeModel("gemini-3-flash-preview")
 
 
 def summarize_messages(
