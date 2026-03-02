@@ -60,11 +60,12 @@ def sanitize_facebook_message(model: object | None, text: str) -> str:
 		print("[WARN] Gemini unavailable, using hashtag-removed text only")
 		return cleaned_text
 
-	prompt = f"""Bạn là trợ lý biên tập nội dung cho Facebook.
+	prompt = f"""
+Bạn là trợ lý biên tập nội dung cho Facebook.
 
 Nhiệm vụ:
 • Hãy tìm những từ ngữ trong đoạn văn này có thể bị thuật toán Facebook quét là vi phạm tiêu chuẩn cộng đồng hoặc nhạy cảm và thay thế bằng từ phù hợp hơn
-• Hãy tóm tắt nội dung chính của đoạn văn này thành một câu văn ngắn gọn, sắc sảo, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
+• Hãy tóm tắt nội dung chính của đoạn văn này thành một đoạn văn ngắn gọn, đủ ý, phù hợp để đăng lên Facebook, đồng thời đảm bảo không vi phạm tiêu chuẩn cộng đồng của Facebook.
 • Chỉnh sửa các hashtag hiện tại nếu có hoặc thêm mới cho phù hợp với nội dung đã chỉnh sửa, nhưng chỉ sử dụng các hashtag an toàn và phổ biến, tránh các hashtag có thể bị Facebook gắn cờ.
 • Không sử dụng bất kỳ ký tự đặc biệt nào khác ngoài dấu chấm câu cơ bản và dấu gạch ngang để phân tách các ý trong đoạn văn.
 • Ngôn ngữ Tiếng Việt
