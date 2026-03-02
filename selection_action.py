@@ -39,7 +39,7 @@ text_fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "200"))
 media_channel_usernames = parse_channels(os.getenv("TELEGRAM_CHANNEL_MEDIA_USERNAME", ""))
 raw_media_channel_ids = os.getenv("TELEGRAM_CHANNEL_MEDIA_ID", "")
 media_channel_ids = parse_channel_ids(raw_media_channel_ids)
-media_window_seconds = int(os.getenv("TELEGRAM_MEDIA_WINDOW_SECONDS", "1200"))
+media_window_seconds = int(os.getenv("TELEGRAM_MEDIA_WINDOW_SECONDS", "1800"))
 media_fetch_limit = int(os.getenv("TELEGRAM_MEDIA_FETCH_LIMIT", "100"))
 
 gemini_model = create_gemini_model()

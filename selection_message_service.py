@@ -66,11 +66,11 @@ TIN NHẮN MEDIA (từ kênh media):
 YÊU CẦU:
 1. Phân tích ý nghĩa ngữ nghĩa của các tin nhắn văn bản
 2. So sánh với nội dung preview của từng tin nhắn media
-3. Chọn tin nhắn media PHÙ HỢP NHẤT hoặc liên quan nhất đến nội dung văn bản trả về số thứ tự của media
+3. Chọn tất cả tin nhắn media PHÙ HỢP hoặc liên quan đến nội dung tin nhắn văn bản trả về tất cả các số thứ tự của media được chọn cách nhau bằng dấu phẩy ví dụ: 1, 3, 5
 4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về "NONE"
 
 ĐỊNH DẠNG TRẢ LỜI:
-Bạn CHỈ được trả về số thứ tự của media ví dụ: 1, 2, 3 hoặc NONE.
+Bạn CHỈ được trả về số thứ tự của media ví dụ: 1, 3, 5 hoặc NONE.
 Không được giải thích thêm, chỉ trả về SỐ hoặc NONE.
 
 Lựa chọn của bạn:"""
