@@ -60,7 +60,6 @@ def summarize_messages(
     joined_messages = "\n".join(f"- {message}" for message in messages)
     prompt = f"""
 Bạn là một Sĩ quan Phân tích tình báo thuộc Bộ tham mưu chiến lược. Nhiệm vụ của bạn là tiếp nhận chuỗi dữ liệu thô, lọc bỏ nhiễu và tổng hợp thành một bản báo cáo ngắn gọn, khách quan, lạnh lùng.
-
 Yêu cầu về nội dung:
 1   Phân tích Quân sự: Tập trung vào biến động lực lượng, khí tài, các điểm nóng xung đột và thay đổi học thuyết tác chiến.
 2   Phân tích Chính trị: Tập trung vào các liên minh, biến động nội bộ cấp cao, các quyết sách lập pháp ảnh hưởng đến đại cục.

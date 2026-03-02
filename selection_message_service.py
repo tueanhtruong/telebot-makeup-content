@@ -88,20 +88,16 @@ def select_most_relevant_media(
 	joined_media_messages = "\n\n".join(media_list)
 	
 	prompt = f"""
-	Bạn là một hệ thống AI chuyên phân tích và so khớp tin nhắn. Nhiệm vụ của bạn là phân tích các tin nhắn văn bản và tin nhắn có media, sau đó xác định tin nhắn media nào phù hợp nhất với nội dung văn bản.
-
+Bạn là một hệ thống AI chuyên phân tích và so khớp tin nhắn. Nhiệm vụ của bạn là phân tích các tin nhắn văn bản và tin nhắn có media, sau đó xác định tin nhắn media nào phù hợp nhất với nội dung văn bản.
 TIN NHẮN VĂN BẢN (từ kênh tổng hợp):
 {joined_text_messages}
-
 TIN NHẮN MEDIA (từ kênh media):
 {joined_media_messages}
-
 YÊU CẦU:
 1. Phân tích ý nghĩa ngữ nghĩa của các tin nhắn văn bản
 2. So sánh với nội dung preview của từng tin nhắn media
 3. Chọn tất cả tin nhắn media PHÙ HỢP hoặc liên quan đến nội dung tin nhắn văn bản trả về tất cả các số thứ tự của media được chọn cách nhau bằng dấu phẩy ví dụ: 1, 3, 5
 4. Nếu KHÔNG có tin nhắn media nào phù hợp, trả về "NONE"
-
 ĐỊNH DẠNG TRẢ LỜI:
 Bạn CHỈ được trả về số thứ tự của media ví dụ: 1, 3, 5 hoặc NONE.
 Không được giải thích thêm, chỉ trả về SỐ hoặc NONE.
