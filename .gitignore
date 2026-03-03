@@ -16,6 +16,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 develop-eggs/
@@ -52,3 +53,4 @@ logs/
 
 # Generated files
 media_messages.json
+legacy

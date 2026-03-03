@@ -1,0 +1,180 @@
+[INFO] Cloning messages from channel 1
+[INFO] Content filter: both
+[INFO] Window seconds: 3600
+[INFO] Fetch limit: 200
+[INFO] Connecting to 91.108.56.152:443/TcpFull...
+[INFO] Connection to 91.108.56.152:443/TcpFull complete!
+[INFO] Collected 53 text message(s) for analysis
+[INFO] 
+========================================================================
+[INFO] GENERATED LLM PROMPT:
+[INFO] ========================================================================
+[INFO] 
+Asking GEMINI for strategic analysis...
+[INFO] [TOKEN USAGE][GEMINI] unavailable
+[INFO] 
+========================================================================
+[INFO] AI ANALYSIS RESULT (GEMINI):
+[INFO] ========================================================================
+[INFO] BÁO CÁO CHIẾN LƯỢC: BIẾN ĐỘNG ĐỊA CHÍNH TRỊ VÀ CÚ SỐC THỊ TRƯỜNG TOÀN CẦU
+
+CÁC CHỦ ĐỀ CHÍNH:
+
+⚔️ XUNG ĐỘT TRUNG ĐÔNG VÀ CHIẾN THUẬT PHI ĐỐI XỨNG
+- Hoạt động quân sự leo thang mạnh mẽ khi Israel tấn công kho đạn sát thủ đô Tehran; Hezbollah xác nhận phá hủy xe tăng Merkava thứ ba của đối phương.
+- Xung đột vũ trang tại khu vực này đang tạo ra một "hiệp lực lệch cân", trực tiếp phân tán nguồn lực viện trợ của phương Tây và làm suy giảm khả năng cung ứng khí tài cho chiến trường Ukraine.
+- Hoa Kỳ kích hoạt trạng thái giám sát an ninh nội địa đặc biệt và đóng cửa vô thời hạn đại sứ quán tại Beirut trước rủi ro bị "kích hoạt" bởi các tác nhân cực đoan.
+- Nga duy trì trạng thái quan sát chiến lược, tận dụng sự hỗn loạn để củng cố vị thế khi các đối thủ phương Tây bị sa lầy vào cuộc chiến proxy mới.
+
+🏛️ ĐỊA CHÍNH TRỊ VÀ CÁN CÂN QUYỀN LỰC MỚI
+- Tổng thống Mỹ Donald Trump xác nhận năng lực phòng thủ của Iran đang suy kiệt, đồng thời thực hiện các cuộc hội đàm kín với Thủ tướng Đức Merz để định hình lại trật tự xuyên Đại Tây Dương.
+- Romania bắt đầu tiến trình đàm phán gia nhập liên minh hạt nhân với Pháp, một bước đi chiến lược nhằm tăng cường khả năng răn đe hạt nhân tại Đông Âu.
+- Các cường quốc khu vực như Ả Rập Xê Út và UAE đang ráo riết thực hiện các hoạt động ngoại giao đa phương để kiểm soát rủi ro đổ vỡ chuỗi cung ứng dầu mỏ.
+
+📊 KINH TẾ VÀ QUYỀN LỰC MỀM CỦA ĐỒNG ĐÔ LA
+- Chỉ số DXY tăng vọt lên 99,52 điểm, xác lập vị thế độc tôn của đồng USD khi cơ chế định giá dầu mỏ buộc thị trường phải tăng cường vay mượn bằng đồng tiền này.
+- Đồng Won (Hàn Quốc) sụp đổ xuống dưới ngưỡng 1.500 lần đầu tiên kể từ năm 2009; Vàng giao ngay mất mốc 5.000 USD/ounce trong một đợt bán tháo kỷ lục hơn 6% trong ngày.
+- Lãnh đạo Fed khẳng định lạm phát vẫn ở mức thách thức, dự kiến duy trì lãi suất cao để răn đe các bóng ma tài chính trước khi các gói kích cầu năm 2026 được triển khai.
+
+📌 NĂNG LƯỢNG VÀ ĐỨT GÃY LOGISTICS TOÀN CẦU
+- Chi phí vận tải dầu thô tại cảng Yanbu (Ả Rập Xê Út) tăng đột biến lên mức 28 triệu USD/tàu khi các hãng vận tải lớn như Maersk né tránh eo biển Hormuz.
+- Dầu thô Nga tiếp tục tìm được điểm đến ổn định tại Ấn Độ, bất chấp các nỗ lực bao vây kinh tế từ phương Tây.
+- Chỉ số biến động STOXX của Châu Âu vượt ngưỡng 30 điểm, phản ánh tâm lý hoảng loạn của thị trường trước các rủi ro địa chính trị lưỡng dụng.
+
+#diachinh tri #kinhte #nangluong #quansu #taichinh
+
+---
+*Ghi chú: Dữ liệu được tổng hợp dựa trên diễn biến thị trường và các báo cáo thực địa.*
+[INFO] ========================================================================
+[INFO] 
+NHIỆM VỤ CHÍNH: Nhận dữ liệu thô không có cấu trúc, lọc bỏ thông tin vô nghĩa 
+và nội dung vi phạm pháp luật Việt Nam, sau đó tự động nhóm lại thành các chủ 
+đề quan trọng theo nội dung dữ liệu.
+
+LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
+- thông tin không liên quan, tin đồn, dữ liệu trùng lặp
+- liên quan nội bộ chính trị Việt Nam (dù tích cực hay tiêu cực)
+- xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước VN
+- vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
+- nghi ngờ → loại bỏ.
+
+YÊU CẦU XỬ LÝ DỮ LIỆU:
+- Tự động xác định những chủ đề chính có tác động đến địa chính trị, quân sự, chính trị hoặc kinh tế
+- Giữ lại chỉ những thông tin có giá trị chiến lược
+- Tóm tắt thành các câu ngắn, mạnh mẽ, dễ hành động
+
+LĨNH VỰC PHÂN TÍCH:
+- Tự động nhóm dựa trên dữ liệu, không cần đặt câu hỏi
+- Địa chính trị, quân sự, chính trị, kinh tế, sự kiện khác
+
+TÔN GIỌNG & PHONG CÁCH:
+- Trung lập nhưng CÓ TÍNH SẮC SẢO, châm biếm tinh tế (cynical undertone)
+- Sử dụng thuật ngữ chuyên môn: địa chính trị, lưỡng dụng, răn đe hạt nhân, phi đối xứng, quyền lực mềm, chiến tranh proxy, hiệp lực lệch cân
+- Không đặt câu hỏi, chỉ trình bày tổng hợp
+- Tránh từ ngữ mạnh/bạo lực thô: thay "chiến tranh" bằng "xung đột vũ trang", "tấn công" bằng "hoạt động quân sự"
+
+ĐỊNH DẠNG CHO FACEBOOK (MOBILE-FIRST):
+- Sử dụng dấu gạch ngang (-) để phân tách các dòng thông tin
+- Tiêu đề VIẾT HOA, có sức nặng
+- Emoji được dùng: ⚔️ 🏛️ 📊 📌 (tránh các emoji có thể bị gắn cờ)
+- Bullet points ngắn, mỗi dòng 1-2 ý chính
+- Không dùng ký tự đặc biệt phức tạp, không dùng bảng biểu
+- Khoảng cách rõ ràng giữa các phần để dễ đọc trên di động
+
+CẤU TRÚC ĐẦU RA:
+
+[1] TIÊU ĐỀ BÁO CÁO - VIẾT HOA, GỢI HỨNG THÚ
+
+[2] CÁC CHỦ ĐỀ CHÍNH (tự động nhóm dựa trên dữ liệu):
+Với mỗi chủ đề:
+- Sử dụng emoji thích hợp (⚔️ cho quân sự, 🏛️ cho chính trị, 📊 cho kinh tế, 📌 cho sự kiện khác)
+- Tiêu đề chủ đề VIẾT HOA
+- 2-4 dòng thông tin chi tiết
+
+[3] HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ)
+
+NHỮNG GÌ CẦN TRÁNH:
+- Không đưa ra lời khuyên đầu tư hoặc khuyến cáo hành động
+- Không phán xét về quyền lợi của các bên (trung lập)
+- Không sử dụng từ ngữ có thể bị Facebook gắn cờ
+- Không đặt câu hỏi - chỉ kết luận
+- Không nhận xét chính trị nội bộ
+
+HƯỚNG DẪN CUỐI:
+- Tìm và thay thế từ ngữ nhạy cảm bằng từ chuyên môn phù hợp
+- Mỗi thông tin phải CÓ CỤ THỂ: con số, tên, địa điểm, thời gian (nếu có)
+- Giữ tổng cộng dưới 500 từ, mật độ thông tin cao
+- Đảm bảo mỗi câu đều có giá trị
+
+---
+BẮT ĐẦU XỬ LÝ DỮ LIỆU:
+- ▫️  Chủ tịch Fed New York thể hiện quyết tâm chính sách, có thể khởi động lại việc cắt giảm lãi suất sau khi tác động của thuế quan giảm bớt  
+
+Ông Williams của Cục Dự trữ Liên bang Mỹ cho biết, việc cắt giảm lãi suất hơn nữa sẽ là hợp lý một khi phần lớn ảnh hưởng của thuế quan đã giảm bớt và lạm phát tiếp tục chậm lại. Trong bài phát biểu chuẩn bị sẵn, ông Williams không đề cập đến tác động kinh tế của cuộc xung đột Iran. Ông Williams nói: “Nếu lạm phát đi theo quỹ đạo mà tôi dự kiến, thì cuối cùng lãi suất quỹ liên bang sẽ cần phải giảm thêm để ngăn chính sách tiền tệ vô tình trở nên hạn chế hơn”. Ông nói thêm rằng thuế quan sẽ có thêm tác động tiếp theo đến giá tiêu dùng trong nửa đầu năm nay, sau đó tỷ lệ lạm phát sẽ giảm xuống 2,5% vào cuối năm 2026 và trở lại 2% vào năm 2027. Đồng thời, ông Williams chỉ ra rằng thị trường lao động đã có “những dấu hiệu ổn định đáng khích lệ” trong những tháng gần đây, với sự thúc đẩy của tăng trưởng “vững chắc”, tỷ lệ thất nghiệp sẽ tiếp tục giảm nhẹ trong năm nay và năm tới. Ông dự kiến ​​tăng trưởng kinh tế năm nay sẽ vào khoảng 2,5%. Ông nói: “Với việc thiếu các hiệu ứng vòng hai và kỳ vọng lạm phát được neo giữ tốt, tôi dự đoán rằng thuế quan phần lớn chỉ có tác động một lần đến giá cả,” đồng thời nói thêm rằng tác động cao điểm của việc đánh thuế sẽ qua đi “vào cuối năm nay”.
+- 🔴  Đô la Mỹ tăng hơn 1%, các loại tiền tệ khác ngoài đô la Mỹ đều giảm  
+
+Chỉ số Đô la Mỹ DXY tiếp tục tăng cao, hiện ở mức 99,52, tăng 1% trong ngày. Đô la Úc so với Đô la Mỹ AUD/USD giảm mạnh 2% trong ngày, Đô la New Zealand so với Đô la Mỹ NZD/USD giảm 1,5%, Euro so với Đô la Mỹ EUR/USD giảm 1,2%, Bảng Anh so với Đô la Mỹ GBP/USD giảm gần 1%.
+- ▫️Ông Williams của Cục Dự trữ Liên bang Mỹ: Tình hình kinh tế hiện tại có vẻ an toàn đối với các hộ gia đình giàu có, nhưng lại đầy thách thức đối với những hộ gia đình khác.
+- 🔴  Cơ chế định giá dầu mỏ thúc đẩy đồng đô la Mỹ mạnh lên, kìm hãm đà tăng của vàng  
+
+Juan Perez của Monex USA viết rằng, sự tăng vọt của giá dầu do xung đột ở Trung Đông gây ra là động lực chính cho sự tăng giá của đồng đô la Mỹ gần đây. Ông cho biết, do phần lớn hoạt động thương mại dầu thô được định giá bằng đồng đô la Mỹ, những khó khăn trong vận chuyển ở eo biển Hormuz sẽ dẫn đến giá dầu tăng, từ đó buộc thị trường phải tăng cường vay mượn đồng đô la Mỹ, dẫn đến đồng đô la Mỹ mạnh lên, đồng thời kìm hãm đà tăng của vàng. Thị trường lo ngại rằng cuộc xung đột này có thể kéo dài hơn dự kiến trước đó. Perez chỉ ra rằng, tiền tệ của các thị trường mới nổi, vốn đã hoạt động tốt cho đến tuần trước, hiện cũng đang suy yếu so với đồng đô la Mỹ.
+- 🔴  Vàng giao ngay mất mốc 5000 đô la Mỹ  
+
+Vàng giao ngay mất mốc 5000 đô la Mỹ/ounce, chạm mức thấp mới kể từ ngày 20 tháng 2, giảm hơn 6% trong ngày.
+- ▫️Tin tức thị trường: Bahrain báo động.
+- ▫️  Chiến sự Trung Đông phân tán trọng tâm viện trợ quân sự của phương Tây, Putin nhận thấy lợi thế tiềm năng  
+
+Theo năm người thạo tin, Nga cảm thấy sốc trước các cuộc tấn công của Mỹ và Israel vào Iran, nhưng phần lớn không thể giúp đỡ đồng minh của mình và nhận thấy những lợi thế tiềm năng từ đó. Hai người thạo tin cho biết, nhu cầu về tên lửa phòng không của các quốc gia vùng Vịnh phải đối mặt với các cuộc tấn công của Iran có nghĩa là các nguồn lực dành cho Ukraine có thể bị giảm bớt; và nếu cuộc chiến ở Trung Đông rơi vào tình trạng kéo dài, việc Mỹ bán vũ khí cho Kiev có thể chậm lại. Tuy nhiên, số phận của Khamenei một lần nữa làm dấy lên sự lo lắng của Nga về những nỗ lực thay đổi chế độ của phương Tây. Putin đã kinh hoàng trước đoạn video về cái chết của Gaddafi. Khi được hỏi vào tháng 6 năm ngoái về phản ứng của Nga nếu Israel ám sát Khamenei, ông đã từ chối thảo luận về khả năng này.
+- ▫️Theo hãng tin TASS: Dầu của Nga được ưa chuộng ở Ấn Độ.
+- ▫️Tổng thống Mexico Sheinbaum: Kế hoạch thuế của Mexico có thể ngăn chặn giá xăng tăng.
+- ▫️Bộ trưởng Bộ An ninh Nội địa Hoa Kỳ, Norm: Không hề yêu cầu dừng cuộc điều tra về vụ xả súng ở bang Minnesota.
+- 🔴Tỷ giá hối đoái giữa đồng won Hàn Quốc và đô la Mỹ lần đầu tiên giảm xuống dưới ngưỡng 1500 kể từ tháng 3 năm 2009.
+- ▫️Schmid của Cục Dự trữ Liên bang: Mất uy tín về lạm phát phải trả giá đắt.
+- ▫️Cơ quan quản lý dịch vụ tài chính Dubai của Các Tiểu vương quốc Ả Rập Thống nhất tiếp tục theo dõi chặt chẽ diễn biến tình hình khu vực.
+- ▫️Theo hãng thông tấn Tasnim của Iran: Một vụ nổ đã xảy ra ở miền bắc Israel.
+- ▫️Chỉ số giá thương mại sữa toàn cầu của New Zealand đến ngày 3 tháng 3 là 5.7%, giá trị trước đó là 3.6%.
+- ▫️  Chủ tịch Fed Schmid khẳng định lập trường, nhấn mạnh lạm phát vẫn còn quá cao  
+
+Chủ tịch Ngân hàng Dự trữ Liên bang Kansas City, Schmid, tái khẳng định lạm phát vẫn còn quá cao và nói thêm rằng dữ liệu mới nhất cho thấy tỷ lệ lạm phát cao hơn gần một điểm phần trăm so với mục tiêu của Fed. Ông nói: “Lạm phát đã ở trên mục tiêu của Fed gần 5 năm, tôi nghĩ chúng ta không có lý do gì để tự mãn”. Sau khi giữ nguyên lãi suất trong cuộc họp đầu tiên hàng năm vào tháng 1, các quan chức Fed dự kiến sẽ tiếp tục giữ nguyên lãi suất trong cuộc họp tháng này. Hầu hết các nhà hoạch định chính sách cho biết họ có xu hướng tạm thời giữ lãi suất ổn định để chờ đợi thêm bằng chứng cho thấy lạm phát hạ nhiệt và hướng tới mục tiêu của họ. Schmid chỉ ra rằng có áp lực lạm phát rõ ràng trong các hàng hóa chịu ảnh hưởng của thuế quan và lĩnh vực dịch vụ. Ông cho biết, mặc dù ông lạc quan rằng trí tuệ nhân tạo và các công nghệ mới nổi khác cuối cùng sẽ mang lại tăng trưởng không lạm phát, nhưng “chúng ta vẫn chưa đạt đến bước đó”. Schmid cũng đề cập đến dữ liệu gần đây, nói rằng nó “phần lớn cho thấy thị trường lao động đang ở trạng thái cân bằng”. Ông cảnh báo rằng khi dân số già đi, nhu cầu cao đối với các chuyên gia chăm sóc sức khỏe sẽ tiếp tục, điều này đang gây áp lực lên tỷ suất lợi nhuận của ngành và có thể gây ra rủi ro lạm phát hơn nữa. Trong năm 2025, ngành chăm sóc sức khỏe đóng góp gần như tất cả các vị trí việc làm mới.
+- ▫️Thống đốc tỉnh Tehran của Iran: Việc vận chuyển hàng hóa đang diễn ra bình thường. Chúng tôi không cảm thấy lo lắng về nguồn cung các mặt hàng thiết yếu và nhu cầu của người dân.
+- ▫️Theo hãng thông tấn Tasnim của Iran: Hezbollah đã phá hủy chiếc xe tăng Merkava thứ ba.
+- 🔴Chỉ số biến động STOXX của Châu Âu lần đầu tiên vượt qua ngưỡng 30 kể từ sau sự kiện thuế quan tháng 4 năm 2025.
+- ▫️Thông báo từ Maersk Line: Các biện pháp hạn chế tạm thời đã được thực hiện đối với Israel và một số quốc gia Trung Đông, ảnh hưởng đến việc tiếp nhận và xử lý hàng hóa nguy hiểm.
+- ▫️Quân đội Iran: Kể từ khi chiến tranh bắt đầu, chúng tôi đã phá hủy 35 máy bay không người lái tiên tiến của đối phương.
+- 🔴Các nhà giao dịch và nhà môi giới cho biết, khi Saudi Aramco cố gắng chuyển dầu từ eo biển Hormuz đến Biển Đỏ, giá cước vận chuyển dầu thô bằng tàu chở dầu tại cảng Yanbu của Ả Rập Xê Út đã tăng hơn gấp đôi, lên tới 28 triệu đô la Mỹ mỗi tàu.
+- ▫️Chỉ số chứng khoán chính của Mexico giảm 5%.
+- ▫️Theo các nhà giao dịch và nhà môi giới, do các công ty vận tải biển nói chung tránh khu vực Trung Đông, một số tuyến đường chở dầu đến Yanbu vẫn đang tạm ngừng hoạt động.
+- ▫️Phủ Tổng thống Pháp: Tổng thống Pháp Emmanuel Macron đã có các cuộc gặp riêng với các nhà lãnh đạo của Síp, Lebanon, Qatar, Các Tiểu vương quốc Ả Rập Thống nhất và Khu tự trị người Kurd ở Iraq để thảo luận về tình hình Trung Đông.
+- ▫️Ngoại trưởng Nga và Oman đã có cuộc điện đàm, hai bên thảo luận về tình hình Iran, kêu gọi chấm dứt các hành động quân sự càng sớm càng tốt.
+- ▫️Tin tức thị trường: Lực lượng Phòng vệ Israel đã tấn công một kho đạn dược gần nhà ga xe lửa Vardavard, phía tây Tehran, thủ đô của Iran.
+- ▫️  Phong vũ biểu kinh tế nông nghiệp Hoa Kỳ tăng nhẹ, cải thiện tâm lý ngắn hạn khó che giấu những lo ngại tài chính dài hạn  
+
+Theo khảo sát hàng tháng mới nhất do Đại học Purdue và CME Group công bố, nông dân Mỹ đang dần chuyển sang lạc quan về triển vọng kinh tế của họ. Trong “Phong vũ biểu kinh tế nông nghiệp” mới nhất, quan điểm của nông dân về tình hình kinh tế hiện tại đã được cải thiện một chút. Tuy nhiên, cuộc khảo sát chỉ ra rằng nông dân vẫn bi quan về tình hình tài chính trong tương lai. Michael Langemeier của Đại học Purdue cho biết: “So với một năm trước, nhiều hoạt động trang trại vẫn cảm thấy áp lực tài chính, điều này được thể hiện trong chiến lược đầu tư thận trọng của họ cũng như những kỳ vọng thận trọng hơn cho năm tới.” Khoảng 44% số người được hỏi cho biết tình hình hoạt động trang trại của họ trong tháng 2 tồi tệ hơn so với cùng kỳ năm ngoái.
+- ▫️Theo nhiều hãng thông tấn Iran đưa tin, người dân nghe thấy tiếng nổ ở thủ đô Tehran của Iran và các thành phố Tabriz và Urmia ở phía tây bắc.
+- ▫️Tỷ giá EUR/USD đã giảm 2,1% kể từ thứ Sáu tuần trước và có khả năng ghi nhận mức giảm hai ngày lớn nhất kể từ tháng 9 năm 2022.
+- ▫️Quân đội Israel đã ban hành lệnh sơ tán cho cư dân thành phố Sidon ở miền nam Li-băng.
+- ▫️Theo Wall Street Journal: Đại sứ quán Ả Rập Saudi lại bị tấn công vào thứ Ba.
+- 🔴Theo Politico: Tổng thống Mỹ Donald Trump nói rằng "các bệ phóng của Iran đang cạn kiệt".
+- ▫️Fed Schmid: Tôi sẽ nhớ Chủ tịch Fed Powell. Ông ấy là một người Mỹ vĩ đại.
+- 🔴Tổng thống Mỹ Trump sẽ gặp Thủ tướng Đức Merz tại Nhà Trắng sau mười phút nữa.
+- ▫️Schmid của Cục Dự trữ Liên bang: Vị trí của chúng ta khá tốt.
+- ▫️Thành viên Fed Schmid: Mong được hợp tác với chủ tịch mới, bất kể người đó là ai.
+- ▫️Đại sứ quán Hoa Kỳ tại Oman khôi phục lệnh trú ẩn tại chỗ.
+- ▫️Schmid của Cục Dự trữ Liên bang Hoa Kỳ: Cục Dự trữ Liên bang Hoa Kỳ định vị tốt, nền kinh tế hoạt động tốt.
+- ▫️Schmid của Cục Dự trữ Liên bang Mỹ: Chúng ta không có vấn đề mang tính chu kỳ trên thị trường lao động, nếu có, chúng ta sẽ có quan điểm khác về chính sách tiền tệ.
+- ▫️  Sau các cuộc tấn công của Iran, Mỹ tăng cường giám sát "các mối đe dọa tiềm ẩn" trong nước  
+
+Ngày 3/3 theo giờ địa phương, Bộ trưởng An ninh Nội địa Hoa Kỳ, ông Nomp, khi làm chứng trước Ủy ban Tư pháp Thượng viện, cho biết Bộ An ninh Nội địa đã bắt đầu xem xét lại một phần các nhóm người nhập cư vào nước này theo luật bảo vệ tạm thời, bao gồm xem xét các hoạt động trên mạng xã hội của họ, v.v., và trong một số trường hợp tiến hành các cuộc phỏng vấn mới. Được biết, sau khi Hoa Kỳ phát động các cuộc tấn công vào Iran, Cục Điều tra Liên bang Hoa Kỳ đã chỉ thị cho các đặc vụ theo dõi chặt chẽ những người có liên quan trong nước có thể bị "kích hoạt" do tình hình ở Iran.
+- ▫️Tin tức thị trường: Các nguồn tin Iran báo cáo về một vụ tấn công bằng máy bay không người lái gần Kiryat Shmona.
+- 🔴Fed's Schmid: Cần chú ý đến tình hình vĩ mô, giảm lạm phát xuống 2%; Một lượng lớn các biện pháp kích thích tài khóa sẽ được đưa ra vào năm 2026.
+- ▫️Bộ trưởng Ngoại giao Romania: Romania đã được mời tham gia đối thoại hạt nhân của Pháp.
+- ▫️Ngoại trưởng Romania: Các cuộc đàm phán đang ở giai đoạn đầu, lập trường của Romania sẽ được Hội đồng An ninh Tối cao phê duyệt.
+- ▫️Schmid của Cục Dự trữ Liên bang: Mọi người lo lắng về sự không chắc chắn của việc làm và trí tuệ nhân tạo hơn là về nền kinh tế.
+- ▫️Fed Schmid: Hãy xem các sự kiện chính trị toàn cầu sẽ diễn biến như thế nào.
+- ▫️Tin tức thị trường: Thủ tướng Đức Merz đến Nhà Trắng để gặp gỡ Trump.
+- 🔴Đại sứ quán Hoa Kỳ tại Beirut: Do tình hình khu vực tiếp tục căng thẳng, đại sứ quán sẽ đóng cửa vô thời hạn.
+- ▫️Ông Williams của Cục Dự trữ Liên bang Mỹ: Các nghiên cứu khác nhau đều đi đến kết luận nhất quán về thuế quan, điều này rất quan trọng để Cục Dự trữ Liên bang hiểu vấn đề này.
+- ▫️Ông Williams của Cục Dự trữ Liên bang Mỹ: Việc lạm phát tiếp tục lệch khỏi mục tiêu thực sự có nguy cơ dẫn đến thay đổi kỳ vọng lạm phát; nhưng cho đến nay, tình huống này vẫn chưa xảy ra.
+- ▫️Ông Williams của Cục Dự trữ Liên bang Mỹ: Nền kinh tế Mỹ ngày nay không còn phụ thuộc vào nhập khẩu dầu mỏ như 50 năm trước, sự biến động giá dầu sẽ không thay đổi căn bản quỹ đạo kinh tế.
+- 🔴Ông Williams của Cục Dự trữ Liên bang Mỹ: Vẫn cho rằng lãi suất chính sách của Cục Dự trữ Liên bang Mỹ cao hơn một chút so với lãi suất trung lập.
+[INFO] ========================================================================
