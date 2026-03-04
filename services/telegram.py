@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable, Optional
 
 from telethon import TelegramClient
-from telethon.tl.types import DocumentAttributeAudio, DocumentAttributeVideo, PeerChannel
+from telethon.tl.types import (
+	DocumentAttributeAudio,
+	DocumentAttributeVideo,
+	MessageEntityTextUrl,
+	MessageEntityUrl,
+	PeerChannel,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -80,8 +87,93 @@ async def resolve_targets(
 	return targets
 
 
+def _remove_mentions(text: str) -> str:
+	"""Remove all @mentions/tags from text."""
+	# Remove @username patterns (@ followed by alphanumeric, underscore, or hyphen)
+	return re.sub(r'@[\w-]+', '', text).strip()
+
+
 def _message_text(message: object) -> str:
-	return (getattr(message, "raw_text", None) or getattr(message, "message", None) or "").strip()
+	"""Get message text with links formatted inline.
+	
+	Custom display text links: 'display text: url'
+	Plain URLs: unchanged
+	All @mentions are removed.
+	"""
+	entities = getattr(message, "entities", None)
+	message_text = getattr(message, "message", "") or ""
+	# Remove all @mentions/tags from the text
+	message_text = _remove_mentions(message_text)
+	
+	if not message_text:
+		return ""
+	
+	# If no entities, just remove mentions and return
+	if not entities:
+		return message_text
+	
+
+	
+	# Collect all link entities with their positions
+	link_replacements: list[tuple[int, int, str]] = []
+	
+	for entity in entities:
+		if isinstance(entity, MessageEntityTextUrl):
+			# Link with custom display text - format as "display text: url"
+			offset = getattr(entity, "offset", 0)
+			length = getattr(entity, "length", 0)
+			url = getattr(entity, "url", "")
+			display_text = message_text[offset : offset + length]
+			replacement = f"{display_text}: {url}"
+			link_replacements.append((offset, length, replacement))
+		# Plain URLs (MessageEntityUrl) are left unchanged
+	
+	# Sort by offset in reverse order to replace from end to start
+	# This prevents offset shifts when replacing
+	link_replacements.sort(key=lambda x: x[0], reverse=True)
+	
+	# Replace links in the text
+	result = message_text
+	for offset, length, replacement in link_replacements:
+		result = result[:offset] + replacement + result[offset + length:]
+	
+	
+	return result.strip()
+
+
+def _extract_links(message: object) -> list[dict[str, str]]:
+	"""Extract links from message entities and format as display text and URL."""
+	entities = getattr(message, "entities", None)
+	if not entities:
+		return []
+
+	message_text = getattr(message, "message", "")
+	links: list[dict[str, str]] = []
+
+	for entity in entities:
+		if isinstance(entity, MessageEntityTextUrl):
+			# Link with custom display text
+			offset = getattr(entity, "offset", 0)
+			length = getattr(entity, "length", 0)
+			url = getattr(entity, "url", "")
+			display_text = message_text[offset : offset + length] if message_text else ""
+			links.append({
+				"display_text": display_text,
+				"url": url,
+				"formatted": f"{display_text}: {url}",
+			})
+		elif isinstance(entity, MessageEntityUrl):
+			# Plain URL in text - keep as is
+			offset = getattr(entity, "offset", 0)
+			length = getattr(entity, "length", 0)
+			url = message_text[offset : offset + length] if message_text else ""
+			links.append({
+				"display_text": url,
+				"url": url,
+				"formatted": url,
+			})
+
+	return links
 
 
 def _extract_document_metadata(document: object) -> dict[str, Any]:
@@ -160,6 +252,7 @@ def _format_message_entry(
 	text = _message_text(message)
 	media = _extract_media_info(message)
 	media_types = [item["type"] for item in media]
+	links = _extract_links(message)
 	grouped_id = getattr(message, "grouped_id", None)
 	date = getattr(message, "date", None)
 
@@ -173,6 +266,8 @@ def _format_message_entry(
 		"date": date.astimezone(timezone.utc).isoformat() if date else None,
 		"text": text,
 		"has_text": bool(text),
+		"links": links,
+		"has_links": bool(links),
 		"media": media,
 		"media_types": media_types,
 		"has_media": bool(media),
@@ -189,6 +284,9 @@ def _merge_group_entry(group: dict[str, Any], entry: dict[str, Any]) -> None:
 	if not group.get("text") and entry.get("text"):
 		group["text"] = entry["text"]
 		group["has_text"] = True
+	# Merge links from grouped messages
+	group["links"].extend(entry.get("links", []))
+	group["has_links"] = bool(group["links"])
 	group["has_media"] = bool(group["media"])
 
 
@@ -264,6 +362,55 @@ async def clone_messages(
 	return results
 
 
+async def clone_messages_with_objects(
+	client: TelegramClient,
+	targets: Iterable[object],
+	*,
+	window_seconds: Optional[int] = None,
+	fetch_limit: int = 200,
+	content_filter: str = "both",
+) -> list[tuple[dict[str, Any], object]]:
+	"""
+	Clone recent messages and return both cloned data and raw message objects.
+
+	Returns:
+		List of tuples: (cloned_message_dict, raw_message_object)
+	"""
+	cloned_results = await clone_messages(
+		client,
+		targets,
+		window_seconds=window_seconds,
+		fetch_limit=fetch_limit,
+		content_filter=content_filter,
+	)
+	
+	# Reconstruct message objects for downloaded media
+	# Store raw message references by mapping message_ids
+	results_with_objects: list[tuple[dict[str, Any], object]] = []
+	
+	for target in targets:
+		try:
+			messages = await client.get_messages(target, limit=fetch_limit)
+		except Exception as error:
+			logger.warning("get_messages failed for %s: %s", getattr(target, "id", "unknown"), error)
+			continue
+
+		if not messages:
+			continue
+
+		# Create a mapping of message_id to message object
+		message_map = {getattr(msg, "id", None): msg for msg in messages}
+		
+		# Match cloned results with raw messages
+		for cloned_data in cloned_results:
+			message_id = cloned_data.get("message_id")
+			if message_id in message_map:
+				raw_message = message_map[message_id]
+				results_with_objects.append((cloned_data, raw_message))
+
+	return results_with_objects
+
+
 async def clone_messages_from_channels(
 	client: TelegramClient,
 	*,
@@ -279,6 +426,29 @@ async def clone_messages_from_channels(
 		logger.warning("No valid channel targets found")
 		return []
 	return await clone_messages(
+		client,
+		targets,
+		window_seconds=window_seconds,
+		fetch_limit=fetch_limit,
+		content_filter=content_filter,
+	)
+
+
+async def clone_messages_from_channels_with_objects(
+	client: TelegramClient,
+	*,
+	channel_usernames: list[str],
+	channel_ids: list[int],
+	window_seconds: Optional[int] = None,
+	fetch_limit: int = 200,
+	content_filter: str = "both",
+) -> list[tuple[dict[str, Any], object]]:
+	"""Resolve channels and clone messages, returning both data and raw message objects."""
+	targets = await resolve_targets(client, channel_usernames, channel_ids)
+	if not targets:
+		logger.warning("No valid channel targets found")
+		return []
+	return await clone_messages_with_objects(
 		client,
 		targets,
 		window_seconds=window_seconds,

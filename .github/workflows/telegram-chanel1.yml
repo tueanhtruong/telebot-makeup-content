@@ -2,8 +2,8 @@ name: Telegram Poll and Post
 
 on:
   schedule:
-    # Run every 20 minutes
-    - cron: "*/20 * * * *"
+    # Run every 40 minutes
+    - cron: "*/40 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -41,22 +41,18 @@ jobs:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           TELEGRAM_SESSION_NAME: ${{ secrets.TELEGRAM_SESSION_NAME || 'telethon_session' }}
-          TELEGRAM_CHANNEL_USERNAMES: ${{ secrets.TELEGRAM_CHANNEL_USERNAMES || 'vnwallstreet' }}
-          TELEGRAM_CHANNEL_IDS: ${{ secrets.TELEGRAM_CHANNEL_IDS }}
-          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-          TELEGRAM_WINDOW_SECONDS: ${{ secrets.TELEGRAM_WINDOW_SECONDS || '1800' }}
-          TELEGRAM_FETCH_LIMIT: ${{ secrets.TELEGRAM_FETCH_LIMIT || '100' }}
+
+          TELEGRAM_WINDOW_SECONDS: "3600"
+          TELEGRAM_FETCH_LIMIT: "200"
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FACEBOOK_TOKEN: ${{ secrets.FACEBOOK_TOKEN }}
           FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
-        run: |
-          python action.py
+          LLM_PROVIDER: "gemini"
+          TELEGRAM_CONTENT_FILTER: "text"
+          TELEGRAM_CHANNEL_1_USERNAME: ${{ secrets.TELEGRAM_CHANNEL_1_USERNAME }}
+          TELEGRAM_CHANNEL_1_ID: ${{ secrets.TELEGRAM_CHANNEL_1_ID }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY }}
+          GROK_MODEL: ${{ secrets.GROK_MODEL || 'grok-4-fast-reasoning' }}
 
-    #   - name: Upload session as artifact (if created/updated)
-    #     if: always()
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: telegram-session-${{ github.run_number }}
-    #       path: telethon_session.session
-    #       if-no-files-found: ignore
-    #       retention-days: 7
+        run: |
+          python channels/channel1.py

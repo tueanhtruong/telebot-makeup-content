@@ -68,7 +68,7 @@ llm_provider = os.getenv("LLM_PROVIDER", "gemini").strip().lower() or "gemini"
 client = TelegramClient(session_name, api_id, api_hash)
 
 
-def _build_analysis_prompt(messages: list[str]) -> str:
+def _build_analysis_prompt(messages: list[str], channelName: str = '') -> str:
 	"""Build the strategic analysis prompt from text messages."""
 	if not messages:
 		return ""
@@ -118,9 +118,9 @@ Với mỗi chủ đề:
 - Tiêu đề chủ đề VIẾT HOA
 - 2-4 dòng thông tin chi tiết
 
-Nguồn: Telegram
+Nguồn: Telegram {channelName}
 
-HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ)
+HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu)
 
 NHỮNG GÌ CẦN TRÁNH:
 - Không đưa ra lời khuyên đầu tư hoặc khuyến cáo hành động
@@ -167,7 +167,7 @@ async def main() -> None:
 	text_messages = [item.get("text", "") for item in results if item.get("has_text")]
 	if text_messages:
 		logger.info("Collected %s text message(s) for analysis", len(text_messages))
-		prompt = _build_analysis_prompt(text_messages)
+		prompt = _build_analysis_prompt(text_messages, channelName=channel_username)
 		if prompt:
 			logger.info("\n" + "="*72)
 			logger.info("GENERATED LLM PROMPT:")
