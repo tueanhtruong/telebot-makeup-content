@@ -1,4 +1,4 @@
-name: Telegram Selection and Post
+name: Run Telegram Channel 2 Analysis and Post
 
 on:
   schedule:

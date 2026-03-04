@@ -1,4 +1,4 @@
-name: Telegram Poll and Post
+name: Run Telegram Channel 1 Analysis and Post
 
 on:
   schedule:
