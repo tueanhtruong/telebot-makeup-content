@@ -50,7 +50,7 @@ jobs:
           FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
           TELEGRAM_CHANNEL_2_USERNAME: ${{ secrets.TELEGRAM_CHANNEL_2_USERNAME }}
           TELEGRAM_CHANNEL_2_ID: ${{ secrets.TELEGRAM_CHANNEL_2_ID }}
-          TELEGRAM_CONTENT_FILTER: ${{ secrets.TELEGRAM_CONTENT_FILTER || 'both' }}
+          TELEGRAM_CONTENT_FILTER: "both"
           GROK_API_KEY: ${{ secrets.GROK_API_KEY }}
           GROK_MODEL: ${{ secrets.GROK_MODEL || 'grok-4-fast-reasoning' }}
         run: |

@@ -118,7 +118,7 @@ Với mỗi chủ đề:
 - Tiêu đề chủ đề VIẾT HOA
 - 2-4 dòng thông tin chi tiết
 
-Nguồn: Telegram {channelName}
+Nguồn: {channelName}
 
 HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu)
 
