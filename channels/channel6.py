@@ -41,7 +41,7 @@ def parse_channel_id(raw: str) -> Optional[int]:
 	try:
 		return int(raw)
 	except ValueError:
-		logger.warning("Invalid TELEGRAM_CHANNEL_4_ID: %s", raw)
+		logger.warning("Invalid TELEGRAM_CHANNEL_6_ID: %s", raw)
 		return None
 
 
@@ -66,12 +66,12 @@ api_id = int(get_required_env("TELEGRAM_API_ID"))
 api_hash = get_required_env("TELEGRAM_API_HASH")
 session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or "telethon_session"
 
-channel_username = os.getenv("TELEGRAM_CHANNEL_4_USERNAME", "").strip()
-channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_4_ID", "").strip())
+channel_username = os.getenv("TELEGRAM_CHANNEL_6_USERNAME", "").strip()
+channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_6_ID", "").strip())
 
 window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "600"))
 fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "10"))
-content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "text").strip().lower() or "text"
+content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "both").strip().lower() or "both"
 
 client = TelegramClient(session_name, api_id, api_hash)
 
@@ -307,7 +307,7 @@ async def main() -> None:
 	channel_ids = [channel_id] if channel_id is not None else []
 
 	if not channel_usernames and not channel_ids:
-		raise ValueError("Set TELEGRAM_CHANNEL_4_USERNAME or TELEGRAM_CHANNEL_4_ID")
+		raise ValueError("Set TELEGRAM_CHANNEL_6_USERNAME or TELEGRAM_CHANNEL_6_ID")
 
 	logger.info("Cloning messages from channel 2")
 	logger.info("Content filter: %s", content_filter)
