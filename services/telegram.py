@@ -236,9 +236,9 @@ def _extract_media_info(message: object) -> list[dict[str, Any]]:
 
 def _passes_filter(has_text: bool, has_media: bool, content_filter: str) -> bool:
 	if content_filter == "text":
-		return has_text
+		return has_text and not has_media
 	if content_filter == "media":
-		return has_media
+		return has_media and not has_text
 	return has_text or has_media
 
 
