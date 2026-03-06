@@ -58,8 +58,8 @@ session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or
 channel_username = os.getenv("TELEGRAM_CHANNEL_1_USERNAME", "").strip()
 channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_1_ID", "").strip())
 
-window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "3600"))
-fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "200"))
+window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "43200"))
+fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "500"))
 content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "text").strip().lower() or "text"
 # llm_provider = os.getenv("LLM_PROVIDER", "grok").strip().lower() or "grok"
 llm_provider = os.getenv("LLM_PROVIDER", "gemini").strip().lower() or "gemini"
@@ -118,7 +118,7 @@ Với mỗi chủ đề:
 - Tiêu đề chủ đề VIẾT HOA
 - 2-4 dòng thông tin chi tiết
 
-Nguồn: {channelName}
+Nguồn: t.me/{channelName}
 
 HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu)
 

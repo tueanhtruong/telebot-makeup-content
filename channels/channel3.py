@@ -41,7 +41,7 @@ def parse_channel_id(raw: str) -> Optional[int]:
 	try:
 		return int(raw)
 	except ValueError:
-		logger.warning("Invalid TELEGRAM_CHANNEL_2_ID: %s", raw)
+		logger.warning("Invalid TELEGRAM_CHANNEL_3_ID: %s", raw)
 		return None
 
 
@@ -52,26 +52,6 @@ def preview(text: str, limit: int = 1200) -> str:
 	return f"{text[:limit]}..."
 
 
-api_id = int(get_required_env("TELEGRAM_API_ID"))
-api_hash = get_required_env("TELEGRAM_API_HASH")
-session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or "telethon_session"
-
-channel_username = os.getenv("TELEGRAM_CHANNEL_2_USERNAME", "").strip()
-channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_2_ID", "").strip())
-
-window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "600"))
-fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "20"))
-content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "both").strip().lower() or "both"
-
-client = TelegramClient(session_name, api_id, api_hash)
-
-def _remove_prefix(text: str, prefix: str = 'JUST IN:') -> str:
-	"""Remove a specific prefix from text."""
-	if text.startswith(prefix):
-		return text[len(prefix):]
-	return text
-
-
 def _remove_tags(text: str) -> str:
 	"""Remove hashtags and @mentions from text for cleaner previews."""
 	cleaned = re.sub(r"#[\w-]+", "", text or "")
@@ -79,6 +59,19 @@ def _remove_tags(text: str) -> str:
 	cleaned = re.sub(r"\s{2,}", " ", cleaned)
 	return cleaned.strip()
 
+
+api_id = int(get_required_env("TELEGRAM_API_ID"))
+api_hash = get_required_env("TELEGRAM_API_HASH")
+session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or "telethon_session"
+
+channel_username = os.getenv("TELEGRAM_CHANNEL_3_USERNAME", "").strip()
+channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_3_ID", "").strip())
+
+window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "1800"))
+fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "10"))
+content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "both").strip().lower() or "both"
+
+client = TelegramClient(session_name, api_id, api_hash)
 
 def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	"""Create a prompt to ask LLM to sanitize text."""
@@ -301,18 +294,18 @@ async def _post_to_facebook(
 		return upload_feed(text)
 
 
-def _remove_prefix(text: str, prefix: str = 'JUST IN:') -> str:
-	"""Remove a specific prefix from text."""
-	if text.startswith(prefix):
-		return text[len(prefix):]
-	return text
+# def _remove_prefix(text: str, prefix: str = 'JUST IN:') -> str:
+# 	"""Remove a specific prefix from text."""
+# 	if text.startswith(prefix):
+# 		return text[len(prefix):]
+# 	return text
 
 async def main() -> None:
 	channel_usernames = [channel_username] if channel_username else []
 	channel_ids = [channel_id] if channel_id is not None else []
 
 	if not channel_usernames and not channel_ids:
-		raise ValueError("Set TELEGRAM_CHANNEL_2_USERNAME or TELEGRAM_CHANNEL_2_ID")
+		raise ValueError("Set TELEGRAM_CHANNEL_3_USERNAME or TELEGRAM_CHANNEL_3_ID")
 
 	logger.info("Cloning messages from channel 2")
 	logger.info("Content filter: %s", content_filter)
@@ -338,7 +331,7 @@ async def main() -> None:
 		message_id = cloned_data.get("message_id")
 		media_types = ", ".join(cloned_data.get("media_types", [])) or "none"
 		raw_text = cloned_data.get("text", "")
-		text_preview = preview(_remove_tags(_remove_prefix(raw_text)))
+		text_preview = preview(_remove_tags(raw_text))
 		
 		logger.info(
 			"[MSG %s] Original text preview: %s | media=%s",
@@ -349,7 +342,7 @@ async def main() -> None:
 		
 		# Sanitize text using LLM
 		if raw_text and raw_text.strip():
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(_remove_prefix(raw_text)), llm_provider=llm_provider)
+			sanitized_text = await _sanitize_text_with_llm(_remove_tags(raw_text), llm_provider=llm_provider)
 			if sanitized_text:
 				logger.info(
 					"[MSG %s] Sanitized text: %s",
