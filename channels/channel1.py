@@ -168,6 +168,17 @@ async def main() -> None:
 	if text_messages:
 		logger.info("Collected %s text message(s) for analysis", len(text_messages))
 		prompt = _build_analysis_prompt(text_messages, channelName=channel_username)
+ 		
+		######################################################################################
+		# Post analysis result to Facebook temporarily without LLM analysis					 
+		# logger.info("\nPosting analysis to Facebook...")                                   
+		# post_id = upload_feed(prompt)
+		# if post_id:
+		# 	logger.info("Successfully posted to Facebook. Post ID: %s", post_id)
+		# else:
+		# 	logger.warning("Failed to post to Facebook")
+		######################################################################################
+
 		if prompt:
 			logger.info("\n" + "="*72)
 			logger.info("GENERATED LLM PROMPT:")

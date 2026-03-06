@@ -59,7 +59,7 @@ session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or
 channel_username = os.getenv("TELEGRAM_CHANNEL_2_USERNAME", "").strip()
 channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_2_ID", "").strip())
 
-window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "300"))
+window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "600"))
 fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "20"))
 content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "both").strip().lower() or "both"
 
