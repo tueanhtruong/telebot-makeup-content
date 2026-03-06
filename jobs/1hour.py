@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 async def _run_channel1() -> None:
-	from channels.channel1 import main as channel1_main
+	from channels.channelSummary import main as channel1_main
 
 	await channel1_main()
 
