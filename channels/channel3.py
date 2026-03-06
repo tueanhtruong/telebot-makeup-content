@@ -53,8 +53,10 @@ def preview(text: str, limit: int = 1200) -> str:
 
 
 def _remove_tags(text: str) -> str:
+	"""Remove JUST IN: from text for cleaner previews."""
+	cleaned = re.sub(r"JUST IN:\s*", "", text or "", flags=re.IGNORECASE)
 	"""Remove hashtags and @mentions from text for cleaner previews."""
-	cleaned = re.sub(r"#[\w-]+", "", text or "")
+	cleaned = re.sub(r"#[\w-]+", "", cleaned)
 	cleaned = re.sub(r"@[\w-]+", "", cleaned)
 	cleaned = re.sub(r"\s{2,}", " ", cleaned)
 	return cleaned.strip()
@@ -67,7 +69,7 @@ session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or
 channel_username = os.getenv("TELEGRAM_CHANNEL_3_USERNAME", "").strip()
 channel_id = parse_channel_id(os.getenv("TELEGRAM_CHANNEL_3_ID", "").strip())
 
-window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "1800"))
+window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "600"))
 fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "10"))
 content_filter = os.getenv("TELEGRAM_CONTENT_FILTER", "both").strip().lower() or "both"
 

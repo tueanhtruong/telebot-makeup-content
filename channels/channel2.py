@@ -73,8 +73,10 @@ def _remove_prefix(text: str, prefix: str = 'JUST IN:') -> str:
 
 
 def _remove_tags(text: str) -> str:
+	"""Remove JUST IN: from text for cleaner previews."""
+	cleaned = re.sub(r"JUST IN:\s*", "", text or "", flags=re.IGNORECASE)
 	"""Remove hashtags and @mentions from text for cleaner previews."""
-	cleaned = re.sub(r"#[\w-]+", "", text or "")
+	cleaned = re.sub(r"#[\w-]+", "", cleaned)
 	cleaned = re.sub(r"@[\w-]+", "", cleaned)
 	cleaned = re.sub(r"\s{2,}", " ", cleaned)
 	return cleaned.strip()
@@ -301,11 +303,6 @@ async def _post_to_facebook(
 		return upload_feed(text)
 
 
-def _remove_prefix(text: str, prefix: str = 'JUST IN:') -> str:
-	"""Remove a specific prefix from text."""
-	if text.startswith(prefix):
-		return text[len(prefix):]
-	return text
 
 async def main() -> None:
 	channel_usernames = [channel_username] if channel_username else []
@@ -338,7 +335,7 @@ async def main() -> None:
 		message_id = cloned_data.get("message_id")
 		media_types = ", ".join(cloned_data.get("media_types", [])) or "none"
 		raw_text = cloned_data.get("text", "")
-		text_preview = preview(_remove_tags(_remove_prefix(raw_text)))
+		text_preview = preview(_remove_tags(raw_text))
 		
 		logger.info(
 			"[MSG %s] Original text preview: %s | media=%s",
@@ -349,7 +346,7 @@ async def main() -> None:
 		
 		# Sanitize text using LLM
 		if raw_text and raw_text.strip():
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(_remove_prefix(raw_text)), llm_provider=llm_provider)
+			sanitized_text = await _sanitize_text_with_llm(_remove_tags(raw_text), llm_provider=llm_provider)
 			if sanitized_text:
 				logger.info(
 					"[MSG %s] Sanitized text: %s",
