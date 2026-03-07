@@ -56,7 +56,12 @@ def load_channel_runtime_config(
 	Supported CLI args (required):
 	- --channel-username
 	- --window-seconds
-	- --content-filter
+	- --content-filter (text|image|video|media|both)
+	  - text: messages with only text
+	  - image: messages with only image/photo (text optional)
+	  - video: messages with only video (text optional)
+	  - media: messages with only image or video (text optional)
+	  - both: all messages
 	- --llm-provider
 
 	Optional:
