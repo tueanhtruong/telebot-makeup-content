@@ -80,6 +80,47 @@ def upload_feed(message: str, *, token: Optional[str] = None, page_id: Optional[
 	return result.get("id")
 
 
+def upload_feed_with_gradient(
+	message: str,
+	*,
+	gradient_id: str = "379007912481140",
+	token: Optional[str] = None,
+	page_id: Optional[str] = None,
+) -> Optional[str]:
+	"""Publish a feed post with gradient background to the Facebook Page.
+
+	If gradient parameters are not supported by the current Page/token, this
+	function automatically falls back to a regular text feed post.
+	
+	Args:
+		message: Text content to post
+		gradient_id: Facebook gradient/background ID (default: blue gradient)
+		token: Facebook access token
+		page_id: Facebook page ID
+	
+	Returns:
+		Post ID if successful, None otherwise
+	"""
+	token = token or get_facebook_token()
+	page_id = page_id or get_facebook_page_id()
+	if not _require_env(token, page_id):
+		return None
+
+	url = f"{GRAPH_BASE_URL}/{page_id}/feed"
+	payload = {
+		"access_token": token,
+		"message": message,
+		"formatting": "MARKDOWN",
+		"text_format_preset_id": gradient_id,
+		"publish": "false",  # Create as unpublished to test gradient support without posting
+	}
+	result = _post(url, payload)
+	if not result:
+		logger.warning("Gradient post failed, falling back to regular feed post")
+		return upload_feed(message, token=token, page_id=page_id)
+	return result.get("id")
+
+
 def _upload_unpublished_photo(
 	image_path: str,
 	*,
