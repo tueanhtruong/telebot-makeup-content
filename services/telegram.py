@@ -234,11 +234,35 @@ def _extract_media_info(message: object) -> list[dict[str, Any]]:
 	]
 
 
-def _passes_filter(has_text: bool, has_media: bool, content_filter: str) -> bool:
+def _passes_filter(has_text: bool, has_media: bool, media_types: list[str], content_filter: str) -> bool:
+	"""Check if message passes the content filter.
+	
+	Args:
+		has_text: Whether message has text
+		has_media: Whether message has media
+		media_types: List of media types (e.g., ["photo", "video"])
+		content_filter: Filter type - "text", "image", "video", "media", or "both"
+	
+	Returns:
+		True if message passes the filter
+	"""
 	if content_filter == "text":
+		# Only text, no media
 		return has_text and not has_media
+	
+	if content_filter == "image":
+		# Only photo media (text optional)
+		return has_media and "photo" in media_types and all(t == "photo" for t in media_types if t != "none")
+	
+	if content_filter == "video":
+		# Only video media (text optional)
+		return has_media and "video" in media_types and all(t == "video" for t in media_types if t != "none")
+	
 	if content_filter == "media":
-		return has_media and not has_text
+		# Only photo or video media (text optional)
+		return has_media and any(t in ["photo", "video"] for t in media_types) and all(t in ["photo", "video", "none"] for t in media_types)
+	
+	# "both" or any other value: accept all
 	return has_text or has_media
 
 
@@ -352,11 +376,11 @@ async def clone_messages(
 					_merge_group_entry(group, entry)
 				continue
 
-			if _passes_filter(entry["has_text"], entry["has_media"], content_filter):
+			if _passes_filter(entry["has_text"], entry["has_media"], entry["media_types"], content_filter):
 				results.append(entry)
 
 	for group in grouped.values():
-		if _passes_filter(group.get("has_text", False), group.get("has_media", False), content_filter):
+		if _passes_filter(group.get("has_text", False), group.get("has_media", False), group.get("media_types", []), content_filter):
 			results.append(group)
 
 	return results
