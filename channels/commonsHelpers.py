@@ -47,7 +47,7 @@ def load_channel_runtime_config(
 	default_content_filter: str = "both",
 	default_window_seconds: int = 600,
 	default_fetch_limit: int = 10,
-	default_llm_provider: str = "grok",
+	default_llm_provider: str = "openrouter",
 	argv: Optional[Sequence[str]] = None,
 	logger: Optional[logging.Logger] = None,
 ) -> ChannelRuntimeConfig:
