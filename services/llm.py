@@ -50,6 +50,14 @@ def _grok_base_url() -> str:
 	return os.getenv("GROK_BASE_URL", "https://api.x.ai/v1").strip() or "https://api.x.ai/v1"
 
 
+def _openrouter_model_name() -> str:
+	return os.getenv("OPENROUTER_MODEL", "openrouter/free").strip() or "openrouter/free"
+
+
+def _openrouter_base_url() -> str:
+	return os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").strip() or "https://openrouter.ai/api/v1"
+
+
 def _print_gemini_token_usage(model: Any, prompt: str, response: Any, label: str) -> None:
 	usage = getattr(response, "usage_metadata", None)
 	prompt_tokens = getattr(usage, "prompt_token_count", None) if usage else None
@@ -80,11 +88,11 @@ def _print_gemini_token_usage(model: Any, prompt: str, response: Any, label: str
 
 
 class LLMClient:
-	"""Unified LLM client for Gemini and Grok providers."""
+	"""Unified LLM client for Gemini, Grok, and OpenRouter providers."""
 
 	def __init__(self, provider: str) -> None:
 		self.provider = provider.lower()
-		if self.provider not in {"gemini", "grok"}:
+		if self.provider not in {"gemini", "grok", "openrouter"}:
 			raise ValueError("Unsupported LLM provider: %s" % provider)
 
 		self.gemini_model = None
@@ -114,7 +122,14 @@ class LLMClient:
 		"""Ask the configured LLM provider and return a normalized response."""
 		if self.provider == "gemini":
 			return self._ask_gemini(prompt, system_prompt=system_prompt, max_retries=max_retries)
-		return self._ask_grok(
+		if self.provider == "grok":
+			return self._ask_grok(
+				prompt,
+				system_prompt=system_prompt,
+				max_retries=max_retries,
+				temperature=temperature,
+			)
+		return self._ask_openrouter(
 			prompt,
 			system_prompt=system_prompt,
 			max_retries=max_retries,
@@ -195,7 +210,55 @@ class LLMClient:
 				return None
 		return None
 
+	def _ask_openrouter(
+		self,
+		prompt: str,
+		*,
+		system_prompt: Optional[str],
+		max_retries: int,
+		temperature: Optional[float],
+	) -> Optional[LLMResponse]:
+		api_key = _get_env_value("OPENROUTER_API_KEY")
+		if not api_key:
+			logger.warning("OPENROUTER_API_KEY is missing")
+			return None
+
+		url = f"{_openrouter_base_url()}/chat/completions"
+		headers = {
+			"Authorization": f"Bearer {api_key}",
+			"Content-Type": "application/json",
+		}
+		messages = []
+		if system_prompt:
+			messages.append({"role": "system", "content": system_prompt})
+		messages.append({"role": "user", "content": prompt})
+
+		payload: dict[str, Any] = {
+			"model": _openrouter_model_name(),
+			"messages": messages,
+		}
+		if temperature is not None:
+			payload["temperature"] = temperature
+
+		for attempt in range(1, max_retries + 2):
+			try:
+				response = requests.post(url, headers=headers, json=payload, timeout=60)
+				if response.status_code != 200:
+					raise RuntimeError(f"HTTP {response.status_code}: {response.text}")
+				data = response.json()
+				choices = data.get("choices", [])
+				message = choices[0].get("message", {}) if choices else {}
+				text = (message.get("content", "") or "").strip()
+				return LLMResponse(text=text, provider="openrouter", model=_openrouter_model_name(), raw=data)
+			except Exception as error:
+				logger.error("OpenRouter request failed (attempt %s): %s", attempt, error)
+				if attempt <= max_retries:
+					_retry_sleep(attempt)
+					continue
+				return None
+		return None
+
 
 def create_llm_client(provider: str) -> LLMClient:
-	"""Factory for LLMClient. Provider values: gemini or grok."""
+	"""Factory for LLMClient. Provider values: gemini, grok, or openrouter."""
 	return LLMClient(provider)

@@ -51,7 +51,7 @@ runtime_config = load_channel_runtime_config(
 	default_content_filter="text",
 	default_window_seconds=3600,
 	default_fetch_limit=500,
-	default_llm_provider="gemini",
+	default_llm_provider="openrouter",
 	logger=logger,
 )
 
@@ -83,11 +83,11 @@ LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
 - liên quan nội bộ chính trị Việt Nam (dù tích cực hay tiêu cực)
 - xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước Việt Nam
 - vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
-- nghi ngờ → loại bỏ.
 
 YÊU CẦU XỬ LÝ DỮ LIỆU:
 - Tự động xác định những chủ đề chính có tác động đến địa chính trị, quân sự, kinh tế, các loại tài sản, các tập đoàn lớn, các cá nhân quan trọng, sự kiện nổi bật
 - Tóm tắt thành các câu ngắn, mạnh mẽ, dễ hành động
+- Mỗi thông tin được trình bày bằng tiếng Việt có dấu
 
 LĨNH VỰC PHÂN TÍCH:
 - Tự động nhóm dựa trên dữ liệu, không cần đặt câu hỏi
