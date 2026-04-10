@@ -86,11 +86,11 @@ LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
 
 CẤU TRÚC ĐẦU RA:
 
-	(nội dung đã được dịch)
+	[nội dung đã được dịch sang tiếng Việt.]
 
 	Nguồn: t.me/{channelName}
 
-	(hashtag - chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu)
+	[hashtag - chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu]
 
 NHỮNG GÌ CẦN TRÁNH:
 
