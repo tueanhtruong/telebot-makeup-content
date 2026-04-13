@@ -157,7 +157,7 @@ def _strip_json_code_fences(text: str) -> str:
 def _post_analysis_to_facebook(analysis_json: str) -> Optional[str]:
 	"""Parse analysis JSON and post to Facebook with gradient background and topic comments.
 	
-	Args:
+	Args:cleaned_json
 		analysis_json: JSON string with 'title' and 'topics' fields
 	
 	Returns:
@@ -166,8 +166,11 @@ def _post_analysis_to_facebook(analysis_json: str) -> Optional[str]:
 	try:
 		# Parse JSON response
 		cleaned_json = _strip_json_code_fences(analysis_json)
+		print("Raw LLM cleaned_json:", repr(cleaned_json)) # Debug print to check cleaned JSON
 		data = json.loads(cleaned_json)
 		title = data.get("title", "")
+		if isinstance(title, list):
+			title = "\n".join(title)
 		topics = data.get("topics", [])
 		
 		if not title:
