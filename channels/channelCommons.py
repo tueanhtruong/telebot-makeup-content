@@ -75,7 +75,7 @@ client = TelegramClient(session_name, api_id, api_hash)
 def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	"""Create a prompt to ask LLM to sanitize text."""
 	return f"""
-Bạn là một chuyên gia dịch thuật tài chính, kinh tế, chính trị sang tiếng Việt.
+Bạn là một chuyên gia dịch thuật tài chính, kinh tế, chính trị và công nghệ sang tiếng Việt.
 
 LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
 
