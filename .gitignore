@@ -2,6 +2,9 @@
 .env
 .env.local
 .env*.local
+.env.prod
+
+
 
 # Telethon session files
 telethon_session*
@@ -43,8 +46,10 @@ wheels/
 .DS_Store
 
 # Logging
-*.log
+*.log*
 logs/
+**/*.log*
+
 
 # Database
 *.db
