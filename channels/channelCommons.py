@@ -84,13 +84,18 @@ LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
 - xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước VN
 - vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
 
-CẤU TRÚC ĐẦU RA:
+ĐỊNH DẠNG ĐẦU RA:
 
-	[nội dung đã được dịch sang tiếng Việt.]
-
-	Nguồn: t.me/{channelName}
-
-	[hashtag - chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu]
+1. Nội dung dịch
+   - Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
+   - Thêm dòng trống giữa các đoạn để dễ đọc
+   - Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
+2. Nguồn gốc
+   - Đặt ở cuối bài, sau nội dung chính, cách nội dung 1 dòng trống
+   - Nội dung: "Nguồn: t.me/{channelName}"
+3. Hashtag
+   - Đặt cuối bài, cách nội dung 1 dòng trống
+   - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
 
 NHỮNG GÌ CẦN TRÁNH:
 
