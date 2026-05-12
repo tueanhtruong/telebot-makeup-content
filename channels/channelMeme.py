@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from dotenv import load_dotenv
-from telethon import TelegramClient, helpers
+from telethon import TelegramClient
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -60,6 +60,43 @@ def _remove_tags(text: str) -> str:
 	return cleaned.strip()
 
 
+def _remove_links_content(text: str) -> str:
+	"""Remove link content, including markdown display text and URLs."""
+	cleaned = text or ""
+	# Remove markdown links like [display text](https://example.com)
+	cleaned = re.sub(r"\[[^\]]*\]\([^\)]*\)", "", cleaned)
+	# Remove HTML links like <a href="...">display text</a>
+	cleaned = re.sub(r"<a\s+[^>]*>.*?</a>", "", cleaned, flags=re.IGNORECASE | re.DOTALL)
+	# Remove bare URLs
+	cleaned = re.sub(r"(?:https?://|www\.)\S+", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"\s{2,}", " ", cleaned)
+	return cleaned.strip()
+
+
+def _get_text_first_line_if_link(text: str) -> str:
+	"""Check if text includes a link. If yes, return first line only. If no, return full text.
+	
+	Args:
+		text: The text to check for links
+	
+	Returns:
+		First line only if link detected, otherwise full text
+	"""
+	if not text:
+		return text
+	
+	# Pattern to match various link formats
+	link_pattern = r"(?:https?://|www\.)\S+|\[[^\]]*\]\([^\)]*\)|<a\s+[^>]*>.*?</a>"
+	
+	if re.search(link_pattern, text, flags=re.IGNORECASE | re.DOTALL):
+		# Link detected - return first line only
+		lines = text.split('\n')
+		return lines[0] if lines else text
+	else:
+		# No link detected - return full text
+		return text
+
+
 api_id = int(get_required_env("TELEGRAM_API_ID"))
 api_hash = get_required_env("TELEGRAM_API_HASH")
 session_name = os.getenv("TELEGRAM_SESSION_NAME", "telethon_session").strip() or "telethon_session"
@@ -83,26 +120,19 @@ def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	"""Create a prompt to ask LLM to sanitize text."""
 	return f"""
 NHIỆM VỤ
-Bạn là chuyên gia dịch thuật khoa học và công nghệ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt, đảm bảo tự nhiên và dễ đọc.
+Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt.
 
-LỌC DỮ LIỆU — Loại bỏ các nội dung sau trước khi dịch:
-- Thông tin không liên quan hoặc trùng lặp
-- Xuyên tạc lịch sử, chủ quyền quốc gia
-- Vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
+LỌC DỮ LIỆU:
+- Loại bỏ thông tin không liên quan hoặc trùng lặp
 
 ĐỊNH DẠNG ĐẦU RA:
 1. Nội dung dịch
-   - Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
+   - Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
+   - Tách thành các đoạn ngắn nếu quá dài, mỗi đoạn 2–4 câu
    - Thêm dòng trống giữa các đoạn để dễ đọc
-   - Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
-
 2. Hashtag
    - Đặt cuối bài, cách nội dung 1 dòng trống
    - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
-
-NHỮNG GÌ CẦN TRÁNH:
-- Không đưa ra lời khuyên đầu tư hoặc khuyến cáo hành động
-- Không dùng từ ngữ có thể bị Facebook gắn cờ
 
 ---
 Nội dung cần dịch:
@@ -326,7 +356,9 @@ async def main() -> None:
 		message_id = cloned_data.get("message_id")
 		media_types = ", ".join(cloned_data.get("media_types", [])) or "none"
 		raw_text = cloned_data.get("text", "")
-		text_preview = preview(_remove_tags(raw_text))
+		first_line_or_full = _get_text_first_line_if_link(raw_text)
+		cleaned_raw_text = _remove_links_content(first_line_or_full)
+		text_preview = preview(_remove_tags(cleaned_raw_text))
 		
 		logger.info(
 			"[MSG %s] Original text preview: %s | media=%s",
@@ -334,26 +366,19 @@ async def main() -> None:
 			text_preview,
 			media_types,
 		)
-		
-		# Sanitize text using LLM
-		if text_preview and text_preview.strip():
-			print(f"\n{'='*72}\nOriginal Text:\n{text_preview}\n{'='*72}")
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
-			if sanitized_text:
-				logger.info(
-					"[MSG %s] Sanitized text: %s",
-					message_id,
-					preview(sanitized_text),
-				)
-				
-				# Post to Facebook with media
-				facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
-				if facebook_id:
-					logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
-				else:
-					logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+		if media_types and media_types != "none":
+			logger.info("[MSG %s] Detected media types: %s", message_id, media_types)
+			# For media posts, we will rely more on LLM to sanitize and summarize the text.
+			sanitized_text = text_preview
+			if sanitized_text and sanitized_text.strip():
+				sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
+			print(f"Sanitized text: {sanitized_text}")
+			facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
+			if facebook_id:
+				logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
 			else:
-				logger.warning("[MSG %s] Failed to sanitize text", message_id)
+				logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+
 		else:
 			logger.warning("[MSG %s] No text content to process", message_id)
 

@@ -19,15 +19,21 @@ if str(ROOT_DIR) not in sys.path:
 
 from services.llm import create_llm_client
 from services.facebook import upload_feed, upload_feed_with_images, upload_video
-from channels.commonsHelpers import load_channel_runtime_config
+from channels.commonsHelpers import load_channel_runtime_config, load_dotenv_runtime_path
 from services.telegram import clone_messages_from_channels_with_objects
 
 
-load_dotenv()
+dotenv_file_path = load_dotenv_runtime_path(default_env_path=".env.local")
+dotenv_path = Path(dotenv_file_path)
+if not dotenv_path.is_absolute():
+	dotenv_path = ROOT_DIR / dotenv_path
+load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+print(f"Using dotenv file: {dotenv_path}")
+print(f"Loaded Stage: {os.getenv('STAGE') if os.getenv('STAGE') else 'not set'}")
 
 def get_required_env(name: str) -> str:
 	value = os.getenv(name, "").strip()
@@ -331,8 +337,9 @@ async def main() -> None:
 		)
 		
 		# Sanitize text using LLM
-		if raw_text and raw_text.strip():
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(raw_text), llm_provider=llm_provider)
+		if text_preview and text_preview.strip():
+			print(f"\n{'='*72}\nOriginal Text:\n{text_preview}\n{'='*72}")
+			sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
 			if sanitized_text:
 				logger.info(
 					"[MSG %s] Sanitized text: %s",

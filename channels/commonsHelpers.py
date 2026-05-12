@@ -21,6 +21,22 @@ class ChannelRuntimeConfig:
 	llm_provider: str
 
 
+def load_dotenv_runtime_path(
+	default_env_path: str = ".env.local",
+	argv: Optional[Sequence[str]] = None,
+) -> str:
+	"""Load dotenv file path from CLI or environment."""
+	parser = argparse.ArgumentParser(add_help=False)
+	parser.add_argument("--env-path", dest="env_path")
+	args, _ = parser.parse_known_args(argv)
+
+	return (
+		(args.env_path if args.env_path is not None else os.getenv("DOTENV_FILE_PATH", default_env_path))
+		.strip()
+		or default_env_path
+	)
+
+
 def parse_channel_id(raw: str, env_name: str, logger: logging.Logger) -> Optional[int]:
 	"""Parse Telegram channel ID string into int."""
 	value = (raw or "").strip()
