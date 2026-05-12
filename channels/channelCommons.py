@@ -89,7 +89,7 @@ LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
    - Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
 2. Nguồn gốc
    - Đặt ở cuối bài, sau nội dung chính, cách nội dung 1 dòng trống
-   - Nội dung: "Nguồn: t.me/{channelName}"
+   - Nội dung: "Theo t.me/{channelName}"
 3. Hashtag
    - Đặt cuối bài, cách nội dung 1 dòng trống
    - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
