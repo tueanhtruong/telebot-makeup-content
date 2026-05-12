@@ -73,14 +73,14 @@ def _remove_links_content(text: str) -> str:
 	return cleaned.strip()
 
 
-def _get_text_first_line_if_link(text: str) -> str:
-	"""Check if text includes a link. If yes, return first line only. If no, return full text.
+def _get_text_except_last_line_if_link(text: str) -> str:
+	"""Check if text includes a link. If yes, return text except the last line. If no, return full text.
 	
 	Args:
 		text: The text to check for links
 	
 	Returns:
-		First line only if link detected, otherwise full text
+		Text except the last line if link detected, otherwise full text
 	"""
 	if not text:
 		return text
@@ -89,9 +89,9 @@ def _get_text_first_line_if_link(text: str) -> str:
 	link_pattern = r"(?:https?://|www\.)\S+|\[[^\]]*\]\([^\)]*\)|<a\s+[^>]*>.*?</a>"
 	
 	if re.search(link_pattern, text, flags=re.IGNORECASE | re.DOTALL):
-		# Link detected - return first line only
+		# Link detected - return text except the last line
 		lines = text.split('\n')
-		return lines[0] if lines else text
+		return '\n'.join(lines[:-1]) if len(lines) > 1 else text
 	else:
 		# No link detected - return full text
 		return text
@@ -356,7 +356,7 @@ async def main() -> None:
 		message_id = cloned_data.get("message_id")
 		media_types = ", ".join(cloned_data.get("media_types", [])) or "none"
 		raw_text = cloned_data.get("text", "")
-		first_line_or_full = _get_text_first_line_if_link(raw_text)
+		first_line_or_full = _get_text_except_last_line_if_link(raw_text)
 		cleaned_raw_text = _remove_links_content(first_line_or_full)
 		text_preview = preview(_remove_tags(cleaned_raw_text))
 		
