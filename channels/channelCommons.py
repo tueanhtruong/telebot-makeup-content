@@ -75,17 +75,14 @@ client = TelegramClient(session_name, api_id, api_hash)
 def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	"""Create a prompt to ask LLM to sanitize text."""
 	return f"""
-Bạn là một chuyên gia dịch thuật tài chính, kinh tế, chính trị và công nghệ sang tiếng Việt.
-
+NHIỆM VỤ
+Bạn là một chuyên gia dịch thuật tài chính, kinh tế, chính trị và công nghệ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt, đảm bảo tự nhiên và dễ đọc.
 LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
-
 - thông tin không liên quan, dữ liệu trùng lặp
 - liên quan nội bộ chính trị Việt Nam (dù tích cực hay tiêu cực)
 - xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước VN
 - vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
-
 ĐỊNH DẠNG ĐẦU RA:
-
 1. Nội dung dịch
    - Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
    - Thêm dòng trống giữa các đoạn để dễ đọc
@@ -96,9 +93,7 @@ LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
 3. Hashtag
    - Đặt cuối bài, cách nội dung 1 dòng trống
    - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
-
 NHỮNG GÌ CẦN TRÁNH:
-
 - Không đưa ra lời khuyên đầu tư hoặc khuyến cáo hành động
 - Không phán xét về quyền lợi của các bên (trung lập)
 - Không sử dụng từ ngữ có thể bị Facebook gắn cờ
