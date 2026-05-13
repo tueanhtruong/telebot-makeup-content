@@ -124,7 +124,7 @@ Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hã
 
 LỌC DỮ LIỆU:
 - Loại bỏ thông tin không liên quan hoặc trùng lặp
-
+- Loại bỏ ký tự đặc biệt, hashtag, @mentions, liên kết (URLs) và giữ lại các icon cảm xúc (emojis).
 ĐỊNH DẠNG ĐẦU RA:
 1. Nội dung dịch
    - Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
