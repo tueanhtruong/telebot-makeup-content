@@ -4,7 +4,7 @@ import json
 from telethon import TelegramClient
 from dotenv import load_dotenv
 
-from telegram_service import (
+from legacyCode.legacy1.telegram_service import (
 	parse_channels,
 	parse_channel_ids,
 	get_required_env,

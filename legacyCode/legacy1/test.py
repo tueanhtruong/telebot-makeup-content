@@ -4,10 +4,10 @@ import asyncio
 from dotenv import load_dotenv
 from telethon import TelegramClient
 
-from facebook_service import post_to_facebook, is_video_message
-from selection_action import upload_selected_media_to_facebook
-from selection_message_service import create_gemini_model
-from telegram_service import (
+from legacyCode.legacy1.facebook_service import post_to_facebook, is_video_message
+from legacyCode.legacy1.selection_action import upload_selected_media_to_facebook
+from legacyCode.legacy1.selection_message_service import create_gemini_model
+from legacyCode.legacy1.telegram_service import (
   parse_channels,
   parse_channel_ids,
   get_required_env,

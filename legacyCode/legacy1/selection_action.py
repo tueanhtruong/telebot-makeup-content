@@ -3,19 +3,19 @@ import asyncio
 from telethon import TelegramClient
 from dotenv import load_dotenv
 
-from telegram_service import (
+from legacyCode.legacy1.telegram_service import (
 	parse_channels,
 	parse_channel_ids,
 	get_required_env,
 	resolve_targets,
 	poll_media_once,
 )
-from selection_message_service import (
+from legacyCode.legacy1.selection_message_service import (
 	create_gemini_model,
 	select_most_relevant_media,
 	format_selection_result,
 )
-from facebook_service import upload_selected_media_to_facebook
+from legacyCode.legacy1.facebook_service import upload_selected_media_to_facebook
 
 
 load_dotenv()

@@ -3,15 +3,14 @@ import asyncio
 from telethon import TelegramClient
 from dotenv import load_dotenv
 
-from telegram_service import (
+from legacyCode.legacy1.telegram_service import (
 	parse_channels,
 	parse_channel_ids,
 	get_required_env,
-	resolve_targets,
-	poll_once,
+	poll_messages,
 )
-from summary_service import create_gemini_model
-from facebook_service import post_to_facebook
+from legacyCode.legacy1.summary_service import create_gemini_model
+from legacyCode.legacy1.facebook_service import post_to_facebook
 
 
 load_dotenv()
@@ -30,44 +29,35 @@ if single_channel_id:
 
 channel_ids = parse_channel_ids(raw_channel_ids)
 
-window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "7200"))
-fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "400"))
+poll_interval_seconds = int(os.getenv("TELEGRAM_POLL_INTERVAL_SECONDS", "1800"))
+window_seconds = int(os.getenv("TELEGRAM_WINDOW_SECONDS", "1800"))
+fetch_limit = int(os.getenv("TELEGRAM_FETCH_LIMIT", "200"))
 
 gemini_model = create_gemini_model()
 client = TelegramClient(session_name, api_id, api_hash)
 
 
 async def main() -> None:
-	print("Action: Running single poll cycle...")
+	print("Server is polling Telegram channel messages...")
 	print(f"Channel usernames: {', '.join(channel_usernames) if channel_usernames else '(none)'}")
 	print(f"Channel IDs: {', '.join(map(str, channel_ids)) if channel_ids else '(none)'}")
+	print(f"Poll interval: {poll_interval_seconds} seconds")
 	print(f"Time window: {window_seconds} seconds")
-	print(f"Fetch limit: {fetch_limit}")
+	print(f"Fetch limit each poll: {fetch_limit}")
 
 	await client.start()
-	
-	targets = await resolve_targets(client, channel_usernames, channel_ids)
-	if not targets:
-		print("[ERROR] No valid channel targets found. Check TELEGRAM_CHANNEL_USERNAMES / TELEGRAM_CHANNEL_ID(S).")
-		return
-
-	print("Resolved channels:")
-	for target in targets:
-		name = getattr(target, "title", None) or getattr(target, "username", None) or str(getattr(target, "id", "unknown"))
-		print(f"- {name} (id: {getattr(target, 'id', 'unknown')})")
-
-	seen_message_ids: dict[int, set[int]] = {}
-	summary, message_count = await poll_once(
+	await poll_messages(
 		client=client,
 		gemini_model=gemini_model,
-		targets=targets,
-		seen_message_ids=seen_message_ids,
+		channel_usernames=channel_usernames,
+		channel_ids=channel_ids,
+		poll_interval_seconds=poll_interval_seconds,
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
+		post_callback=post_to_facebook,
 	)
-	post_to_facebook(summary)
-	print("Action: Poll cycle complete.")
 
 
 if __name__ == "__main__":
 	asyncio.run(main())
+

@@ -6,7 +6,7 @@ from typing import Optional
 from telethon import TelegramClient
 from telethon.tl.types import PeerChannel
 
-from summary_service import summarize_messages, format_summary_log
+from legacyCode.legacy1.summary_service import summarize_messages, format_summary_log
 
 
 def parse_channels(raw: str) -> list[str]:
