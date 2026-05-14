@@ -83,29 +83,28 @@ def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	return f"""
 NHIỆM VỤ
 Bạn là một chuyên gia dịch thuật tài chính, kinh tế, chính trị và công nghệ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt, đảm bảo tự nhiên và dễ đọc.
-LỌC DỮ LIỆU LOẠI BỎ NỘI DUNG:
+LỌC VÀ LOẠI BỎ NỘI DUNG:
 - thông tin không liên quan, dữ liệu trùng lặp
 - liên quan nội bộ chính trị Việt Nam (dù tích cực hay tiêu cực)
-- xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước VN
+- xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước
 - vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
-ĐỊNH DẠNG ĐẦU RA:
-1. Nội dung dịch
-   - Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
-   - Thêm dòng trống giữa các đoạn để dễ đọc
-   - Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
-2. Nguồn gốc
-   - Đặt ở cuối bài, sau nội dung chính, cách nội dung 1 dòng trống
-   - Nội dung: "Theo t.me/{channelName}"
-3. Hashtag
-   - Đặt cuối bài, cách nội dung 1 dòng trống
-   - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
+ĐỊNH DẠNG ĐẦU RA: văn bản gồm các phần sau
+	1. Nội dung dịch
+		- Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
+		- Thêm dòng trống giữa các đoạn để dễ đọc
+		- Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
+	2. Nguồn gốc
+		- Đặt sau nội dung chính, cách nội dung 1 dòng trống
+		- Nội dung: "Theo t.me/{channelName}"
+	3. Hashtag
+		- Đặt cuối bài, cách nội dung 1 dòng trống
+		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
 NHỮNG GÌ CẦN TRÁNH:
 - Không đưa ra lời khuyên đầu tư hoặc khuyến cáo hành động
 - Không phán xét về quyền lợi của các bên (trung lập)
-- Không sử dụng từ ngữ có thể bị Facebook gắn cờ
+- Không sử dụng từ ngữ mạnh hoặc nhạy cảm có thể bị Facebook gắn cờ
 - Không đặt câu hỏi - chỉ kết luận
 - Không nhận xét chính trị nội bộ
-
 Nội dung gốc cần dịch:
 {text}
 """

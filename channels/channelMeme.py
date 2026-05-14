@@ -121,19 +121,17 @@ def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	return f"""
 NHIỆM VỤ
 Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt.
-
 LỌC DỮ LIỆU:
 - Loại bỏ thông tin không liên quan hoặc trùng lặp
 - Loại bỏ ký tự đặc biệt, hashtag, @mentions, liên kết (URLs) và giữ lại các icon cảm xúc (emojis).
-ĐỊNH DẠNG ĐẦU RA:
-1. Nội dung dịch
-   - Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
-   - Tách thành các đoạn ngắn nếu quá dài, mỗi đoạn 2–4 câu
-   - Thêm dòng trống giữa các đoạn để dễ đọc
-2. Hashtag
-   - Đặt cuối bài, cách nội dung 1 dòng trống
-   - Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
-
+ĐỊNH DẠNG ĐẦU RA: văn bản gồm các phần sau
+	1. Nội dung dịch
+		- Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
+		- Tách thành các đoạn ngắn nếu quá dài, mỗi đoạn 2–4 câu
+		- Thêm dòng trống giữa các đoạn để dễ đọc
+	2. Hashtag
+		- Đặt cuối bài, cách nội dung 1 dòng trống
+		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
 ---
 Nội dung cần dịch:
 {text}
