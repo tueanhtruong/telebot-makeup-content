@@ -379,7 +379,9 @@ async def main() -> None:
 			# For media posts, we will rely more on LLM to sanitize and summarize the text.
 			sanitized_text = text_preview
 			if sanitized_text and sanitized_text.strip():
-				sanitized_text = await _remove_dummy_text(_sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider))
+				sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
+				sanitized_text = _remove_dummy_text(sanitized_text or "")
+
 			print(f"Sanitized text: {sanitized_text}")
 			facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
 			if facebook_id:
