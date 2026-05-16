@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+from datetime import date, datetime
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
@@ -19,6 +20,8 @@ class ChannelRuntimeConfig:
 	fetch_limit: int
 	content_filter: str
 	llm_provider: str
+	start_date: Optional[date]
+	end_date: Optional[date]
 
 
 def load_dotenv_runtime_path(
@@ -59,11 +62,23 @@ def _parse_int(value: Optional[str], default: int) -> int:
 		return default
 
 
+def _parse_date(value: Optional[str], field_name: str) -> Optional[date]:
+	raw = (value or "").strip()
+	if not raw:
+		return None
+	try:
+		return datetime.strptime(raw, "%d/%m/%Y").date()
+	except ValueError as error:
+		raise ValueError(f"Invalid {field_name} '{raw}'. Expected format DD/MM/YYYY") from error
+
+
 def load_channel_runtime_config(
 	default_content_filter: str = "both",
 	default_window_seconds: int = 600,
 	default_fetch_limit: int = 10,
 	default_llm_provider: str = "openrouter",
+	default_start_date: Optional[str] = None,
+	default_end_date: Optional[str] = None,
 	argv: Optional[Sequence[str]] = None,
 	logger: Optional[logging.Logger] = None,
 ) -> ChannelRuntimeConfig:
@@ -83,6 +98,8 @@ def load_channel_runtime_config(
 	Optional:
 	- --channel-id
 	- --fetch-limit
+	- --start-date (DD/MM/YYYY)
+	- --end-date (DD/MM/YYYY)
 	"""
 	active_logger = logger or logging.getLogger(__name__)
 
@@ -96,6 +113,8 @@ def load_channel_runtime_config(
 	parser.add_argument("--fetch-limit", dest="fetch_limit")
 	parser.add_argument("--content-filter", dest="content_filter", required=True)
 	parser.add_argument("--llm-provider", dest="llm_provider", required=True)
+	parser.add_argument("--start-date", dest="start_date")
+	parser.add_argument("--end-date", dest="end_date")
 	args, _ = parser.parse_known_args(argv)
 
 	channel_username = (
@@ -128,6 +147,25 @@ def load_channel_runtime_config(
 		or default_llm_provider
 	)
 
+	start_date_raw = (
+		args.start_date
+		if args.start_date is not None
+		else os.getenv("TELEGRAM_START_DATE", default_start_date or "")
+	)
+	end_date_raw = (
+		args.end_date
+		if args.end_date is not None
+		else os.getenv("TELEGRAM_END_DATE", default_end_date or "")
+	)
+
+	start_date = _parse_date(start_date_raw, "start-date")
+	end_date = _parse_date(end_date_raw, "end-date")
+
+	if (start_date is None) != (end_date is None):
+		raise ValueError("Both start-date and end-date are required together (format DD/MM/YYYY)")
+	if start_date and end_date and start_date > end_date:
+		raise ValueError("start-date must be before or equal to end-date")
+
 	return ChannelRuntimeConfig(
 		channel_username=channel_username,
 		channel_id=channel_id,
@@ -135,4 +173,6 @@ def load_channel_runtime_config(
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
 		llm_provider=llm_provider,
+		start_date=start_date,
+		end_date=end_date,
 	)

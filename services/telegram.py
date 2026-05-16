@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Iterable, Optional
 
 from telethon import TelegramClient
@@ -314,6 +314,73 @@ def _merge_group_entry(group: dict[str, Any], entry: dict[str, Any]) -> None:
 	group["has_media"] = bool(group["media"])
 
 
+def _to_utc_datetime(value: Optional[datetime]) -> Optional[datetime]:
+	if value is None:
+		return None
+	if value.tzinfo is None:
+		return value.replace(tzinfo=timezone.utc)
+	return value.astimezone(timezone.utc)
+
+
+def _resolve_date_range(
+	start_date: Optional[date],
+	end_date: Optional[date],
+) -> tuple[Optional[datetime], Optional[datetime]]:
+	if start_date is None and end_date is None:
+		return None, None
+	if start_date is None or end_date is None:
+		raise ValueError("Both start_date and end_date are required together")
+	if start_date > end_date:
+		raise ValueError("start_date must be before or equal to end_date")
+
+	start_dt = datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc)
+	end_exclusive_dt = datetime.combine(end_date + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
+	return start_dt, end_exclusive_dt
+
+
+async def _collect_target_messages(
+	client: TelegramClient,
+	target: object,
+	*,
+	window_seconds: Optional[int],
+	fetch_limit: int,
+	start_date: Optional[date],
+	end_date: Optional[date],
+) -> list[object]:
+	start_dt, end_exclusive_dt = _resolve_date_range(start_date, end_date)
+
+	if start_dt and end_exclusive_dt:
+		# Date-range mode: fetch full history window matching [start_date, end_date].
+		messages_in_range: list[object] = []
+		async for message in client.iter_messages(target, limit=None):
+			message_date = _to_utc_datetime(getattr(message, "date", None))
+			if message_date is None:
+				continue
+			if message_date >= end_exclusive_dt:
+				continue
+			if message_date < start_dt:
+				break
+			messages_in_range.append(message)
+
+		# iter_messages returns newest->oldest by default; normalize to oldest->newest.
+		messages_in_range.reverse()
+		return messages_in_range
+
+	window_start = None
+	if window_seconds is not None:
+		window_start = datetime.now(timezone.utc) - timedelta(seconds=window_seconds)
+
+	messages = await client.get_messages(target, limit=fetch_limit)
+	if not messages:
+		return []
+
+	return [
+		message
+		for message in reversed(messages)
+		if not window_start or (_to_utc_datetime(getattr(message, "date", None)) and _to_utc_datetime(getattr(message, "date", None)) >= window_start)
+	]
+
+
 async def clone_messages(
 	client: TelegramClient,
 	targets: Iterable[object],
@@ -321,6 +388,8 @@ async def clone_messages(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	start_date: Optional[date] = None,
+	end_date: Optional[date] = None,
 ) -> list[dict[str, Any]]:
 	"""
 	Clone recent messages with text and media info from the given targets.
@@ -332,16 +401,19 @@ async def clone_messages(
 		fetch_limit: Max messages per target.
 		content_filter: "text", "media", or "both".
 	"""
-	window_start = None
-	if window_seconds is not None:
-		window_start = datetime.now(timezone.utc) - timedelta(seconds=window_seconds)
-
 	results: list[dict[str, Any]] = []
 	grouped: dict[int, dict[str, Any]] = {}
 
 	for target in targets:
 		try:
-			messages = await client.get_messages(target, limit=fetch_limit)
+			messages = await _collect_target_messages(
+				client,
+				target,
+				window_seconds=window_seconds,
+				fetch_limit=fetch_limit,
+				start_date=start_date,
+				end_date=end_date,
+			)
 		except Exception as error:
 			logger.warning("get_messages failed for %s: %s", getattr(target, "id", "unknown"), error)
 			continue
@@ -353,13 +425,7 @@ async def clone_messages(
 		chat_title = getattr(target, "title", None)
 		chat_username = getattr(target, "username", None)
 
-		recent_messages = [
-			message
-			for message in reversed(messages)
-			if not window_start or (message.date and message.date >= window_start)
-		]
-
-		for message in recent_messages:
+		for message in messages:
 			entry = _format_message_entry(
 				message,
 				chat_id=chat_id,
@@ -393,6 +459,8 @@ async def clone_messages_with_objects(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	start_date: Optional[date] = None,
+	end_date: Optional[date] = None,
 ) -> list[tuple[dict[str, Any], object]]:
 	"""
 	Clone recent messages and return both cloned data and raw message objects.
@@ -406,6 +474,8 @@ async def clone_messages_with_objects(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		start_date=start_date,
+		end_date=end_date,
 	)
 	
 	# Reconstruct message objects for downloaded media
@@ -414,7 +484,14 @@ async def clone_messages_with_objects(
 	
 	for target in targets:
 		try:
-			messages = await client.get_messages(target, limit=fetch_limit)
+			messages = await _collect_target_messages(
+				client,
+				target,
+				window_seconds=window_seconds,
+				fetch_limit=fetch_limit,
+				start_date=start_date,
+				end_date=end_date,
+			)
 		except Exception as error:
 			logger.warning("get_messages failed for %s: %s", getattr(target, "id", "unknown"), error)
 			continue
@@ -443,6 +520,8 @@ async def clone_messages_from_channels(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	start_date: Optional[date] = None,
+	end_date: Optional[date] = None,
 ) -> list[dict[str, Any]]:
 	"""Resolve channels and clone messages with the same options as clone_messages."""
 	targets = await resolve_targets(client, channel_usernames, channel_ids)
@@ -455,6 +534,8 @@ async def clone_messages_from_channels(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		start_date=start_date,
+		end_date=end_date,
 	)
 
 
@@ -466,6 +547,8 @@ async def clone_messages_from_channels_with_objects(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	start_date: Optional[date] = None,
+	end_date: Optional[date] = None,
 ) -> list[tuple[dict[str, Any], object]]:
 	"""Resolve channels and clone messages, returning both data and raw message objects."""
 	targets = await resolve_targets(client, channel_usernames, channel_ids)
@@ -478,4 +561,6 @@ async def clone_messages_from_channels_with_objects(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		start_date=start_date,
+		end_date=end_date,
 	)

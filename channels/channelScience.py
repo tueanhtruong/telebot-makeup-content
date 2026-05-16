@@ -76,6 +76,8 @@ window_seconds = runtime_config.window_seconds
 fetch_limit = runtime_config.fetch_limit
 content_filter = runtime_config.content_filter
 llm_provider = runtime_config.llm_provider
+start_date = runtime_config.start_date
+end_date = runtime_config.end_date
 
 client = TelegramClient(session_name, api_id, api_hash)
 
@@ -309,6 +311,7 @@ async def main() -> None:
 	logger.info("Content filter: %s", content_filter)
 	logger.info("Window seconds: %s", window_seconds)
 	logger.info("Fetch limit: %s", fetch_limit)
+	logger.info("Date range: %s -> %s", start_date, end_date)
 
 	await client.start()
 	results_with_messages = await clone_messages_from_channels_with_objects(
@@ -318,6 +321,8 @@ async def main() -> None:
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		start_date=start_date,
+		end_date=end_date,
 	)
 
 	logger.info("Cloned %s message(s)", len(results_with_messages))
