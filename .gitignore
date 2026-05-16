@@ -60,3 +60,6 @@ logs/
 # Generated files
 media_messages.json
 legacy
+
+auth-token.json
+user.json

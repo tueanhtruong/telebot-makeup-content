@@ -59,6 +59,13 @@ def _remove_tags(text: str) -> str:
 	cleaned = re.sub(r"\s{2,}", " ", cleaned)
 	return cleaned.strip()
 
+def _remove_dummy_text(text: str) -> str:
+	"""Remove some dummy text that often appears in the end of Telegram messages."""
+	cleaned = re.sub(r"Nội dung dịch*", "", text or "", flags=re.IGNORECASE)
+	cleaned = re.sub(r"Hashtag*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"CTA*", "", cleaned, flags=re.IGNORECASE)
+	return cleaned.strip()
+
 
 def _remove_links_content(text: str) -> str:
 	"""Remove link content, including markdown display text and URLs."""
@@ -129,7 +136,10 @@ LỌC DỮ LIỆU:
 		- Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
 		- Tách thành các đoạn ngắn nếu quá dài, mỗi đoạn 2–4 câu
 		- Thêm dòng trống giữa các đoạn để dễ đọc
-	2. Hashtag
+	2. CTA
+		- Đặt cuối bài, cách nội dung 1 dòng trống
+		- Viết một câu kêu gọi theo dõi kênh của tôi để xem thêm nhiều nội dung hài hước
+	3. Hashtag
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
 ---
@@ -369,7 +379,7 @@ async def main() -> None:
 			# For media posts, we will rely more on LLM to sanitize and summarize the text.
 			sanitized_text = text_preview
 			if sanitized_text and sanitized_text.strip():
-				sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
+				sanitized_text = await _remove_dummy_text(_sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider))
 			print(f"Sanitized text: {sanitized_text}")
 			facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
 			if facebook_id:

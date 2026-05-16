@@ -58,6 +58,13 @@ def _remove_tags(text: str) -> str:
 	cleaned = re.sub(r"\s{2,}", " ", cleaned)
 	return cleaned.strip()
 
+def _remove_dummy_text(text: str) -> str:
+	"""Remove some dummy text that often appears in the end of Telegram messages."""
+	cleaned = re.sub(r"Nội dung dịch*", "", text or "", flags=re.IGNORECASE)
+	cleaned = re.sub(r"Nguồn gốc*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"Hashtag*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"CTA*", "", cleaned, flags=re.IGNORECASE)
+	return cleaned.strip()
 
 api_id = int(get_required_env("TELEGRAM_API_ID"))
 api_hash = get_required_env("TELEGRAM_API_HASH")
@@ -96,7 +103,10 @@ LỌC VÀ LOẠI BỎ NỘI DUNG:
 	2. Nguồn gốc
 		- Đặt sau nội dung chính, cách nội dung 1 dòng trống
 		- Nội dung: "Theo t.me/{channelName}"
-	3. Hashtag
+	3. CTA
+		- Đặt cuối bài, cách nội dung 1 dòng trống
+		- Viết một câu kêu gọi theo dõi kênh của tôi để xem thêm nhiều nội dung thú vị
+	4. Hashtag
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
 NHỮNG GÌ CẦN TRÁNH:
@@ -338,7 +348,7 @@ async def main() -> None:
 		# Sanitize text using LLM
 		if text_preview and text_preview.strip():
 			print(f"\n{'='*72}\nOriginal Text:\n{text_preview}\n{'='*72}")
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
+			sanitized_text = await _remove_dummy_text(_sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider))
 			if sanitized_text:
 				logger.info(
 					"[MSG %s] Sanitized text: %s",
