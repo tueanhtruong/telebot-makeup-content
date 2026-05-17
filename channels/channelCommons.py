@@ -353,7 +353,6 @@ async def main() -> None:
 		
 		# Sanitize text using LLM
 		if text_preview and text_preview.strip():
-			print(f"\n{'='*72}\nOriginal Text:\n{text_preview}\n{'='*72}")
 			sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
 			sanitized_text = _remove_dummy_text(sanitized_text or "")
 			if sanitized_text:
