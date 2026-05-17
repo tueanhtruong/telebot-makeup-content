@@ -61,9 +61,10 @@ def _remove_tags(text: str) -> str:
 
 def _remove_dummy_text(text: str) -> str:
 	"""Remove some dummy text that often appears in the end of Telegram messages."""
-	cleaned = re.sub(r"Nội dung dịch*", "", text or "", flags=re.IGNORECASE)
-	cleaned = re.sub(r"Hashtag*", "", cleaned, flags=re.IGNORECASE)
-	cleaned = re.sub(r"CTA*", "", cleaned, flags=re.IGNORECASE)
+	# Remove phrases like "Nội dung dịch" or "1. Nội dung dịch"
+	cleaned = re.sub(r"(?:\d+\.*\s*)?Nội dung dịch*", "", text or "", flags=re.IGNORECASE)
+	cleaned = re.sub(r"(?:\d+\.*\s*)?Hashtag*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"(?:\d+\.*\s*)?CTA*", "", cleaned, flags=re.IGNORECASE)
 	return cleaned.strip()
 
 
