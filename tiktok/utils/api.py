@@ -12,6 +12,25 @@ import requests
 DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024
 
 
+def _build_chunk_size_candidates(video_size: int) -> list[int]:
+    """Build conservative chunk-size candidates for TikTok Direct Post."""
+    preferred_sizes = [5 * 1024 * 1024, 2 * 1024 * 1024, 1 * 1024 * 1024, DEFAULT_CHUNK_SIZE]
+    candidates: list[int] = []
+
+    for chunk_size in preferred_sizes:
+        if video_size > 0:
+            chunk_size = min(chunk_size, video_size)
+        if chunk_size <= 0:
+            continue
+        if chunk_size not in candidates:
+            candidates.append(chunk_size)
+
+    if video_size > 0 and video_size not in candidates:
+        candidates.append(video_size)
+
+    return candidates or [DEFAULT_CHUNK_SIZE]
+
+
 def _extract_tiktok_error(response: requests.Response) -> tuple[str, str]:
     """Extract TikTok error code/message from JSON response if present."""
     try:
@@ -142,26 +161,50 @@ def upload_video_to_tiktok(
         privacy_level = _pick_privacy_level(creator_info)
 
         video_size = os.path.getsize(video_file_path)
-        chunk_size = min(DEFAULT_CHUNK_SIZE, video_size) if video_size > 0 else DEFAULT_CHUNK_SIZE
-        total_chunk_count = max(1, (video_size + chunk_size - 1) // chunk_size)
+        last_error: Optional[Exception] = None
 
-        publish_id, upload_url = _init_direct_post(
-            access_token=access_token,
-            title=description,
-            privacy_level=privacy_level,
-            video_size=video_size,
-            chunk_size=chunk_size,
-            total_chunk_count=total_chunk_count,
-        )
+        for chunk_size in _build_chunk_size_candidates(video_size):
+            total_chunk_count = max(1, (video_size + chunk_size - 1) // chunk_size)
 
-        _upload_file_to_tiktok(
-            upload_url=upload_url,
-            video_file_path=video_file_path,
-            chunk_size=chunk_size,
-        )
+            try:
+                publish_id, upload_url = _init_direct_post(
+                    access_token=access_token,
+                    title=description,
+                    privacy_level=privacy_level,
+                    video_size=video_size,
+                    chunk_size=chunk_size,
+                    total_chunk_count=total_chunk_count,
+                )
 
-        print(f"✅ Video uploaded and submitted. publish_id={publish_id}")
-        return publish_id
+                _upload_file_to_tiktok(
+                    upload_url=upload_url,
+                    video_file_path=video_file_path,
+                    chunk_size=chunk_size,
+                )
+
+                print(f"✅ Video uploaded and submitted. publish_id={publish_id}")
+                return publish_id
+
+            except Exception as error:
+                last_error = error
+                message = str(error)
+
+                if "Token expired" in message:
+                    raise Exception("Token expired")
+                if "Scope not authorized" in message:
+                    raise Exception("Scope not authorized: video.publish")
+                if "Unaudited app restriction" in message:
+                    raise
+
+                if "invalid_params" in message or "chunk" in message.lower() or "publish_id or upload_url" in message:
+                    print(f"⚠️ TikTok upload init failed with chunk_size={chunk_size}: {error}")
+                    continue
+
+                print(f"❌ Error uploading video: {error}")
+                return None
+
+        print(f"❌ Error uploading video: {last_error}")
+        return None
 
     except requests.exceptions.HTTPError as e:
         if e.response is not None and e.response.status_code == 401:

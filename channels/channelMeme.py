@@ -18,9 +18,9 @@ if str(ROOT_DIR) not in sys.path:
 	sys.path.insert(0, str(ROOT_DIR))
 
 from services.llm import create_llm_client
-from services.facebook import upload_feed, upload_feed_with_images, upload_video
 from channels.commonsHelpers import load_channel_runtime_config, load_dotenv_runtime_path
 from services.telegram import clone_messages_from_channels_with_objects
+from channels.utils.channel_meme_posts import post_to_facebook, post_to_tiktok
 
 
 dotenv_file_path = load_dotenv_runtime_path(default_env_path=".env.local")
@@ -179,166 +179,6 @@ async def _sanitize_text_with_llm(text: str, llm_provider: str = "grok") -> Opti
 		return None
 
 
-async def _download_message_media(
-	client: TelegramClient,
-	raw_message: object,
-	message_ids: list[int],
-	output_dir: str = "/tmp/telegram_media",
-) -> list[str]:
-	"""Download media files from all messages in a group.
-	
-	Args:
-		client: Telegram client instance
-		raw_message: A message object from the group (used to get chat info)
-		message_ids: List of all message IDs in the group
-		output_dir: Directory to save media files
-	
-	Returns:
-		List of paths to downloaded media files
-	"""
-	media_paths: list[str] = []
-	
-	try:
-		Path(output_dir).mkdir(parents=True, exist_ok=True)
-		
-		# Get chat info from the message
-		chat_id = getattr(raw_message, "chat_id", None)
-		if not chat_id:
-			chat_id = getattr(raw_message, "peer_id", None)
-		
-		if not chat_id:
-			logger.warning("Could not determine chat_id from message")
-			return media_paths
-		
-		# Download media from all messages in the group
-		for message_id in message_ids:
-			try:
-				# Fetch the specific message by ID
-				messages = await client.get_messages(chat_id, ids=[message_id])
-				if not messages:
-					logger.warning("Could not fetch message %s", message_id)
-					continue
-				
-				msg = messages[0]
-				media = getattr(msg, "media", None)
-				
-				if not media:
-					logger.debug("Message %s has no media", message_id)
-					continue
-				
-				# Download the media
-				output_file = await client.download_media(
-					msg,
-					file=f"{output_dir}/msg_{message_id}",
-				)
-				
-				if output_file:
-					media_paths.append(str(output_file))
-					logger.info("Downloaded media to %s", output_file)
-				else:
-					logger.warning("Failed to download media for message %s", message_id)
-			
-			except Exception as error:
-				logger.warning("Failed to download media for message %s: %s", message_id, error)
-	
-	except Exception as error:
-		logger.warning("Failed to setup media download: %s", error)
-	
-	return media_paths
-
-
-async def _post_to_facebook(
-	text: str,
-	message: dict[str, Any],
-	raw_telegram_message: object,
-	client: TelegramClient,
-) -> Optional[str]:
-	"""Upload media and post to Facebook.
-	
-	For videos: post each video separately with text as description
-	For photos: group all photos and attach to single feed post with text
-	For other media: post text only
-	"""
-	if not text or not text.strip():
-		logger.warning("Empty text, skipping Facebook post")
-		return None
-	
-	media_types = message.get("media_types", [])
-	if not media_types or media_types[0] == "none":
-		# Text-only post
-		return upload_feed(text)
-	
-	# Get message IDs for grouped media download
-	message_ids = message.get("message_ids", [])
-	
-	try:
-		# Separate videos and photos from media_types
-		video_types = [t for t in media_types if t == "video"]
-		photo_types = [t for t in media_types if t == "photo"]
-		
-		posted_ids = []
-		
-		# Handle videos - post each video separately
-		if video_types:
-			logger.info("Processing %d video(s)", len(video_types))
-			media_paths = await _download_message_media(client, raw_telegram_message, message_ids)
-			
-			if media_paths:
-				for video_path in media_paths:
-					try:
-						post_id = upload_video(video_path, text)
-						if post_id:
-							logger.info("Posted video to Facebook: %s", post_id)
-							posted_ids.append(post_id)
-						else:
-							logger.warning("Failed to upload video: %s", video_path)
-					except Exception as e:
-						logger.error("Error uploading video %s: %s", video_path, e)
-			else:
-				logger.warning("Failed to download videos")
-		
-		# Handle photos - group all photos into one feed post
-		if photo_types:
-			logger.info("Processing %d photo(s)", len(photo_types))
-			media_paths = await _download_message_media(client, raw_telegram_message, message_ids)
-			
-			if media_paths:
-				try:
-					post_id = upload_feed_with_images(text, media_paths)
-					if post_id:
-						logger.info("Posted feed with %d image(s) to Facebook: %s", len(media_paths), post_id)
-						posted_ids.append(post_id)
-					else:
-						logger.warning("Failed to post images to Facebook")
-				except Exception as e:
-					logger.error("Error uploading images: %s", e)
-			else:
-				logger.warning("Failed to download images")
-		
-		# If only non-video/non-photo media, post text only
-		other_types = [t for t in media_types if t not in ["video", "photo", "none"]]
-		if other_types and not posted_ids:
-			logger.info("Media type(s) %s not supported for Facebook, posting text only", other_types)
-			post_id = upload_feed(text)
-			if post_id:
-				posted_ids.append(post_id)
-		
-		# If no videos or photos but also no posts yet, post text as fallback
-		if not posted_ids:
-			logger.warning("No media posted, posting text only as fallback")
-			post_id = upload_feed(text)
-			if post_id:
-				posted_ids.append(post_id)
-		
-		# Return the first posted ID
-		return posted_ids[0] if posted_ids else None
-	
-	except Exception as error:
-		logger.error("Error posting to Facebook: %s", error)
-		# Fallback to text-only post
-		return upload_feed(text)
-
-
 async def main() -> None:
 	channel_usernames = [channel_username] if channel_username else []
 	channel_ids = [channel_id] if channel_id is not None else []
@@ -388,12 +228,18 @@ async def main() -> None:
 				sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
 				sanitized_text = _remove_dummy_text(sanitized_text or "")
 				print(f"\n{'='*72}\nSanitized Text:\n{sanitized_text}\n{'='*72}")
-				
-			facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
+
+			facebook_id = await post_to_facebook(sanitized_text, cloned_data, raw_message, client)
 			if facebook_id:
 				logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
 			else:
 				logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+
+			tiktok_id = await post_to_tiktok(sanitized_text, cloned_data, raw_message, client)
+			if tiktok_id:
+				logger.info("[MSG %s] Successfully posted to TikTok: %s", message_id, tiktok_id)
+			else:
+				logger.warning("[MSG %s] Failed to post to TikTok", message_id)
 
 		else:
 			logger.warning("[MSG %s] No text content to process", message_id)
