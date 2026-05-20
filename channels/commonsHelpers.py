@@ -98,8 +98,8 @@ def load_channel_runtime_config(
 	Optional:
 	- --channel-id
 	- --fetch-limit
-	- --start-date (DD/MM/YYYY)
-	- --end-date (DD/MM/YYYY)
+	- --start-date (DD/MM/YYYY, inclusive)
+	- --end-date (DD/MM/YYYY, exclusive)
 	"""
 	active_logger = logger or logging.getLogger(__name__)
 
@@ -163,8 +163,8 @@ def load_channel_runtime_config(
 
 	if (start_date is None) != (end_date is None):
 		raise ValueError("Both start-date and end-date are required together (format DD/MM/YYYY)")
-	if start_date and end_date and start_date > end_date:
-		raise ValueError("start-date must be before or equal to end-date")
+	if start_date and end_date and start_date >= end_date:
+		raise ValueError("start-date must be before end-date")
 
 	return ChannelRuntimeConfig(
 		channel_username=channel_username,

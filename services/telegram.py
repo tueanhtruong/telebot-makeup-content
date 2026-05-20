@@ -330,11 +330,11 @@ def _resolve_date_range(
 		return None, None
 	if start_date is None or end_date is None:
 		raise ValueError("Both start_date and end_date are required together")
-	if start_date > end_date:
-		raise ValueError("start_date must be before or equal to end_date")
+	if start_date >= end_date:
+		raise ValueError("start_date must be before end_date")
 
 	start_dt = datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc)
-	end_exclusive_dt = datetime.combine(end_date + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
+	end_exclusive_dt = datetime.combine(end_date, datetime.min.time(), tzinfo=timezone.utc)
 	return start_dt, end_exclusive_dt
 
 
@@ -350,7 +350,7 @@ async def _collect_target_messages(
 	start_dt, end_exclusive_dt = _resolve_date_range(start_date, end_date)
 
 	if start_dt and end_exclusive_dt:
-		# Date-range mode: fetch full history window matching [start_date, end_date].
+		# Date-range mode: fetch full history window matching [start_date, end_date).
 		messages_in_range: list[object] = []
 		async for message in client.iter_messages(target, limit=None):
 			message_date = _to_utc_datetime(getattr(message, "date", None))

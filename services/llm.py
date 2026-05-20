@@ -43,7 +43,7 @@ def _gemini_model_name() -> str:
 
 
 def _grok_model_name() -> str:
-	return os.getenv("GROK_MODEL", "grok-4-fast-reasoning").strip() or "grok-4-fast-reasoning"
+	return os.getenv("GROK_MODEL", "grok-4-1-fast-reasoning").strip() or "grok-4-1-fast-reasoning"
 
 
 def _grok_base_url() -> str:

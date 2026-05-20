@@ -130,15 +130,14 @@ def _create_sanitization_prompt(text: str, channelName: str = '') -> str:
 	"""Create a prompt to ask LLM to sanitize text."""
 	return f"""
 NHIỆM VỤ
-Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hãy dịch toàn bộ nội dung dưới đây sang tiếng Việt.
+Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hãy dịch nội dung văn bản dưới đây sang tiếng Việt nếu có.
 LỌC DỮ LIỆU:
 - Loại bỏ thông tin không liên quan hoặc trùng lặp
-- Loại bỏ ký tự đặc biệt, hashtag, @mentions, liên kết (URLs) và giữ lại các icon cảm xúc (emojis).
+- Loại bỏ ký tự đặc biệt, hashtag, @mentions, liên kết (URLs).
 ĐỊNH DẠNG ĐẦU RA: văn bản gồm các phần sau
 	1. Nội dung dịch
-		- Viết lại nội dung tiếng Việt một cách tự nhiên, không có từ ngữ nhạy cảm
-		- Tách thành các đoạn ngắn nếu quá dài, mỗi đoạn 2–4 câu
-		- Thêm dòng trống giữa các đoạn để dễ đọc
+		- Viết lại nội dung tiếng Việt nếu có một cách tự nhiên, không có từ ngữ nhạy cảm
+		- Tách thành các đoạn ngắn nếu dài, mỗi đoạn 2–4 câu, thêm dòng trống giữa các đoạn để dễ đọc
 	2. CTA
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Viết một câu kêu gọi theo dõi kênh của tôi để xem thêm nhiều nội dung hài hước
@@ -235,11 +234,11 @@ async def main() -> None:
 			else:
 				logger.warning("[MSG %s] Failed to post to Facebook", message_id)
 
-			tiktok_id = await post_to_tiktok(sanitized_text, cloned_data, raw_message, client)
-			if tiktok_id:
-				logger.info("[MSG %s] Successfully posted to TikTok: %s", message_id, tiktok_id)
-			else:
-				logger.warning("[MSG %s] Failed to post to TikTok", message_id)
+			# tiktok_id = await post_to_tiktok(sanitized_text, cloned_data, raw_message, client)
+			# if tiktok_id:
+			# 	logger.info("[MSG %s] Successfully posted to TikTok: %s", message_id, tiktok_id)
+			# else:
+			# 	logger.warning("[MSG %s] Failed to post to TikTok", message_id)
 
 		else:
 			logger.warning("[MSG %s] No text content to process", message_id)
