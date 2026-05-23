@@ -108,7 +108,7 @@ LỌC VÀ LOẠI BỎ NỘI DUNG:
 		- Nội dung: "Theo t.me/{channelName}"
 	3. CTA
 		- Đặt cuối bài, cách nội dung 1 dòng trống
-		- Viết một câu kêu gọi theo dõi kênh của tôi để xem thêm nhiều nội dung thú vị
+		- Viết một câu kêu gọi theo dõi kênh để xem thêm nhiều nội dung thú vị
 	4. Hashtag
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu

@@ -140,7 +140,7 @@ LỌC DỮ LIỆU:
 		- Tách thành các đoạn ngắn nếu dài, mỗi đoạn 2–4 câu, thêm dòng trống giữa các đoạn để dễ đọc
 	2. CTA
 		- Đặt cuối bài, cách nội dung 1 dòng trống
-		- Viết một câu kêu gọi theo dõi kênh của tôi để xem thêm nhiều nội dung hài hước
+		- Viết một câu kêu gọi theo dõi kênh để xem thêm nhiều nội dung hài hước
 	3. Hashtag
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Chỉ dùng hashtag phổ biến, an toàn, viết liền không dấu
