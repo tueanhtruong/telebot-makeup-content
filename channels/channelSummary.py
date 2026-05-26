@@ -36,7 +36,7 @@ def get_required_env(name: str) -> str:
 	return value
 
 
-def preview(text: str, limit: int = 120) -> str:
+def preview(text: str, limit: int = 12000) -> str:
 	text = (text or "").strip().replace("\n", " ")
 	if len(text) <= limit:
 		return text
