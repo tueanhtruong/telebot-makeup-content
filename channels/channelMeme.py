@@ -65,6 +65,7 @@ def _remove_dummy_text(text: str) -> str:
 	cleaned = re.sub(r"(?:\d+\.*\s*)?Nội dung dịch*:?\s*", "", text or "", flags=re.IGNORECASE)
 	cleaned = re.sub(r"(?:\d+\.*\s*)?Hashtag*:?\s*", "", cleaned, flags=re.IGNORECASE)
 	cleaned = re.sub(r"(?:\d+\.*\s*)?CTA*:?\s*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"\*\*\*\**\s*", "", cleaned, flags=re.IGNORECASE)
 	return cleaned.strip()
 
 
@@ -134,7 +135,7 @@ Bạn là chuyên gia dịch thuật cho những nội dung ngắn vui vẻ. Hã
 LỌC DỮ LIỆU:
 - Loại bỏ thông tin không liên quan hoặc trùng lặp
 - Loại bỏ ký tự đặc biệt, hashtag, @mentions, liên kết (URLs).
-ĐỊNH DẠNG ĐẦU RA: văn bản gồm các phần sau
+ĐỊNH DẠNG ĐẦU RA: 1 đoạn văn gồm các phần sau
 	1. Nội dung dịch
 		- Viết lại nội dung tiếng Việt nếu có một cách tự nhiên, không có từ ngữ nhạy cảm
 		- Tách thành các đoạn ngắn nếu dài, mỗi đoạn 2–4 câu, thêm dòng trống giữa các đoạn để dễ đọc

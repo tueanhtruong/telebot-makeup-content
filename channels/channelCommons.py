@@ -65,6 +65,7 @@ def _remove_dummy_text(text: str) -> str:
 	cleaned = re.sub(r"(?:\d+\.*\s*)?Nguồn gốc*:?\s*", "", cleaned, flags=re.IGNORECASE)
 	cleaned = re.sub(r"(?:\d+\.*\s*)?Hashtag*:?\s*", "", cleaned, flags=re.IGNORECASE)
 	cleaned = re.sub(r"(?:\d+\.*\s*)?CTA*:?\s*", "", cleaned, flags=re.IGNORECASE)
+	cleaned = re.sub(r"\*\*\*\**\s*", "", cleaned, flags=re.IGNORECASE)
 	return cleaned.strip()
 
 api_id = int(get_required_env("TELEGRAM_API_ID"))
@@ -98,7 +99,7 @@ LỌC VÀ LOẠI BỎ NỘI DUNG:
 - liên quan nội bộ chính trị Việt Nam (dù tích cực hay tiêu cực)
 - xuyên tạc lịch sử, chủ quyền, vai trò lãnh đạo của Nhà nước
 - vu khống/xúc phạm tổ chức, cá nhân chưa được xác minh
-ĐỊNH DẠNG ĐẦU RA: văn bản gồm các phần sau
+ĐỊNH DẠNG ĐẦU RA: 1 đoạn văn gồm các phần sau
 	1. Nội dung dịch
 		- Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
 		- Thêm dòng trống giữa các đoạn để dễ đọc
@@ -362,12 +363,12 @@ async def main() -> None:
 					preview(sanitized_text),
 				)
 				
-				# Post to Facebook with media
-				facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
-				if facebook_id:
-					logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
-				else:
-					logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+				# # Post to Facebook with media
+				# facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
+				# if facebook_id:
+				# 	logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
+				# else:
+				# 	logger.warning("[MSG %s] Failed to post to Facebook", message_id)
 			else:
 				logger.warning("[MSG %s] Failed to sanitize text", message_id)
 		else:
