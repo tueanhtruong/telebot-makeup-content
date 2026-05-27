@@ -363,12 +363,12 @@ async def main() -> None:
 					preview(sanitized_text),
 				)
 				
-				# # Post to Facebook with media
-				# facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
-				# if facebook_id:
-				# 	logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
-				# else:
-				# 	logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+				# Post to Facebook with media
+				facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
+				if facebook_id:
+					logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
+				else:
+					logger.warning("[MSG %s] Failed to post to Facebook", message_id)
 			else:
 				logger.warning("[MSG %s] Failed to sanitize text", message_id)
 		else:
