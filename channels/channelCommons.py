@@ -106,7 +106,7 @@ LỌC VÀ LOẠI BỎ NỘI DUNG:
 		- Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
 	2. Nguồn gốc
 		- Đặt sau nội dung chính, cách nội dung 1 dòng trống
-		- Nội dung: "Theo t.me/{channelName}"
+		- Nội dung: "Theo {channelName}"
 	3. CTA
 		- Đặt cuối bài, cách nội dung 1 dòng trống
 		- Viết một câu kêu gọi theo dõi kênh để xem thêm nhiều nội dung thú vị

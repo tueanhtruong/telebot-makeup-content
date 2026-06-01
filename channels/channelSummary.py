@@ -110,7 +110,7 @@ TÔN GIỌNG & PHONG CÁCH:
 - Khoảng cách rõ ràng giữa các phần để dễ đọc trên di động
 
 CẤU TRÚC ĐẦU RA - định dạng JSON với các trường:
-- title: Bao gồm 3 dòng, 1 dòng TIÊU ĐỀ NỘI DUNG CHUNG - VIẾT HOA, GỢI HỨNG THÚ, 1 dòng Tổng hợp từ t.me/{channelName} - xem thêm dưới comments, 1 dòng HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu).
+- title: Bao gồm 3 dòng, 1 dòng TIÊU ĐỀ NỘI DUNG CHUNG - VIẾT HOA, GỢI HỨNG THÚ, 1 dòng Tổng hợp từ {channelName} - xem thêm dưới comments, 1 dòng HASHTAG (chỉ sử dụng hashtag an toàn, phổ biến, không bị gắn cờ và viết liền không dấu).
 - topics: Một mảng các chủ đề, mỗi chủ đề có:
 	- title: Bao gồm emoji thích hợp (⚔️ cho quân sự, 🏛️ cho chính trị, 📊 cho kinh tế, 📌 cho sự kiện khác) và tên chủ đề VIẾT HOA.
 	- details: Một mảng các điểm chi tiết, mỗi điểm là một câu ngắn gọn, mạnh mẽ, chứa thông tin giá trị cụ thể (con số, tên, địa điểm, thời gian nếu có).
