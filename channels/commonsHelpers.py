@@ -19,6 +19,7 @@ class ChannelRuntimeConfig:
 	window_seconds: int
 	fetch_limit: int
 	content_filter: str
+	include_links: bool
 	llm_provider: str
 	start_date: Optional[date]
 	end_date: Optional[date]
@@ -62,6 +63,17 @@ def _parse_int(value: Optional[str], default: int) -> int:
 		return default
 
 
+def _parse_bool(value: Optional[str], default: bool) -> bool:
+	raw = (value or "").strip().lower()
+	if not raw:
+		return default
+	if raw in {"1", "true", "yes", "y", "on"}:
+		return True
+	if raw in {"0", "false", "no", "n", "off"}:
+		return False
+	return default
+
+
 def _parse_date(value: Optional[str], field_name: str) -> Optional[date]:
 	raw = (value or "").strip()
 	if not raw:
@@ -76,6 +88,7 @@ def load_channel_runtime_config(
 	default_content_filter: str = "both",
 	default_window_seconds: int = 600,
 	default_fetch_limit: int = 10,
+	default_include_links: bool = False,
 	default_llm_provider: str = "openrouter",
 	default_start_date: Optional[str] = None,
 	default_end_date: Optional[str] = None,
@@ -93,6 +106,7 @@ def load_channel_runtime_config(
 	  - video: messages with only video (text optional)
 	  - media: messages with only image or video (text optional)
 	  - both: all messages
+	- --link (true|false)
 	- --llm-provider
 
 	Optional:
@@ -112,6 +126,7 @@ def load_channel_runtime_config(
 	parser.add_argument("--window-seconds", dest="window_seconds", required=True)
 	parser.add_argument("--fetch-limit", dest="fetch_limit")
 	parser.add_argument("--content-filter", dest="content_filter", required=True)
+	parser.add_argument("--link", dest="include_links")
 	parser.add_argument("--llm-provider", dest="llm_provider", required=True)
 	parser.add_argument("--start-date", dest="start_date")
 	parser.add_argument("--end-date", dest="end_date")
@@ -133,6 +148,10 @@ def load_channel_runtime_config(
 	fetch_limit = _parse_int(
 		args.fetch_limit if args.fetch_limit is not None else os.getenv("TELEGRAM_FETCH_LIMIT", ""),
 		default_fetch_limit,
+	)
+	include_links = _parse_bool(
+		args.include_links if args.include_links is not None else os.getenv("TELEGRAM_INCLUDE_LINKS", ""),
+		default_include_links,
 	)
 	content_filter = (
 		(args.content_filter if args.content_filter is not None else os.getenv("TELEGRAM_CONTENT_FILTER", default_content_filter))
@@ -172,6 +191,7 @@ def load_channel_runtime_config(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		llm_provider=llm_provider,
 		start_date=start_date,
 		end_date=end_date,

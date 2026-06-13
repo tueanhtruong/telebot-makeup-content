@@ -83,6 +83,7 @@ channel_id = runtime_config.channel_id
 window_seconds = runtime_config.window_seconds
 fetch_limit = runtime_config.fetch_limit
 content_filter = runtime_config.content_filter
+include_links = runtime_config.include_links
 llm_provider = runtime_config.llm_provider
 start_date = runtime_config.start_date
 end_date = runtime_config.end_date
@@ -321,6 +322,7 @@ async def main() -> None:
 
 	logger.info("Cloning messages from channel 2")
 	logger.info("Content filter: %s", content_filter)
+	logger.info("Include links: %s", include_links)
 	logger.info("Window seconds: %s", window_seconds)
 	logger.info("Fetch limit: %s", fetch_limit)
 	logger.info("Date range: %s -> %s", start_date, end_date)
@@ -333,6 +335,7 @@ async def main() -> None:
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)
@@ -344,6 +347,7 @@ async def main() -> None:
 		media_types = ", ".join(cloned_data.get("media_types", [])) or "none"
 		raw_text = cloned_data.get("text", "")
 		text_preview = preview(_remove_tags(raw_text))
+		# text_preview = raw_text
 		
 		logger.info(
 			"[MSG %s] Original text preview: %s | media=%s",
@@ -351,29 +355,28 @@ async def main() -> None:
 			text_preview,
 			media_types,
 		)
-		
-		# Sanitize text using LLM
-		if text_preview and text_preview.strip():
-			sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
-			sanitized_text = _remove_dummy_text(sanitized_text or "")
-			if sanitized_text:
-				logger.info(
-					"[MSG %s] Sanitized text: %s",
-					message_id,
-					preview(sanitized_text),
-				)
-				
-				# Post to Facebook with media
-				facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
-				if facebook_id:
-					logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
-				else:
-					logger.warning("[MSG %s] Failed to post to Facebook", message_id)
-			else:
-				logger.warning("[MSG %s] Failed to sanitize text", message_id)
-		else:
-			logger.warning("[MSG %s] No text content to process", message_id)
 
+		# Sanitize text using LLM
+		# if text_preview and text_preview.strip():
+		# 	sanitized_text = await _sanitize_text_with_llm(_remove_tags(text_preview), llm_provider=llm_provider)
+		# 	sanitized_text = _remove_dummy_text(sanitized_text or "")
+		# 	if sanitized_text:
+		# 		logger.info(
+		# 			"[MSG %s] Sanitized text: %s",
+		# 			message_id,
+		# 			preview(sanitized_text),
+		# 		)
+				
+		# 		# Post to Facebook with media
+		# 		facebook_id = await _post_to_facebook(sanitized_text, cloned_data, raw_message, client)
+		# 		if facebook_id:
+		# 			logger.info("[MSG %s] Successfully posted to Facebook: %s", message_id, facebook_id)
+		# 		else:
+		# 			logger.warning("[MSG %s] Failed to post to Facebook", message_id)
+		# 	else:
+		# 		logger.warning("[MSG %s] Failed to sanitize text", message_id)
+		# else:
+		# 	logger.warning("[MSG %s] No text content to process", message_id)
 
 if __name__ == "__main__":
 	asyncio.run(main())

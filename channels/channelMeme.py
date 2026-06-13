@@ -121,6 +121,7 @@ channel_id = runtime_config.channel_id
 window_seconds = runtime_config.window_seconds
 fetch_limit = runtime_config.fetch_limit
 content_filter = runtime_config.content_filter
+include_links = runtime_config.include_links
 llm_provider = runtime_config.llm_provider
 start_date = runtime_config.start_date
 end_date = runtime_config.end_date
@@ -200,6 +201,7 @@ async def main() -> None:
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)
@@ -224,10 +226,10 @@ async def main() -> None:
 			logger.info("[MSG %s] Detected media types: %s", message_id, media_types)
 			# For media posts, we will rely more on LLM to sanitize and summarize the text.
 			sanitized_text = text_preview
-			if sanitized_text and sanitized_text.strip():
-				sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
-				sanitized_text = _remove_dummy_text(sanitized_text or "")
-				print(f"\n{'='*72}\nSanitized Text:\n{sanitized_text}\n{'='*72}")
+			# if sanitized_text and sanitized_text.strip():
+			# 	sanitized_text = await _sanitize_text_with_llm(_remove_tags(sanitized_text), llm_provider=llm_provider)
+			# 	sanitized_text = _remove_dummy_text(sanitized_text or "")
+			# 	print(f"\n{'='*72}\nSanitized Text:\n{sanitized_text}\n{'='*72}")
 
 			facebook_id = await post_to_facebook(sanitized_text, cloned_data, raw_message, client)
 			if facebook_id:

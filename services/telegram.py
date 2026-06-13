@@ -11,6 +11,8 @@ from telethon import TelegramClient
 from telethon.tl.types import (
 	DocumentAttributeAudio,
 	DocumentAttributeVideo,
+	MessageEntityMention,
+	MessageEntityMentionName,
 	MessageEntityTextUrl,
 	MessageEntityUrl,
 	PeerChannel,
@@ -87,58 +89,63 @@ async def resolve_targets(
 	return targets
 
 
-def _remove_mentions(text: str) -> str:
-	"""Remove all @mentions/tags from text."""
-	# Remove @username patterns (@ followed by alphanumeric, underscore, or hyphen)
-	return re.sub(r'@[\w-]+', '', text).strip()
-
-
-def _message_text(message: object) -> str:
-	"""Get message text with links formatted inline.
-	
-	Custom display text links: 'display text: url'
-	Plain URLs: unchanged
-	All @mentions are removed.
-	"""
-	entities = getattr(message, "entities", None)
-	message_text = getattr(message, "message", "") or ""
-	# Remove all @mentions/tags from the text
-	message_text = _remove_mentions(message_text)
-	
-	if not message_text:
+def _remove_mentions(text: str, entities: Optional[Iterable[object]] = None) -> str:
+	"""Remove Telegram mention entities from text without touching URLs."""
+	if not text:
 		return ""
-	
-	# If no entities, just remove mentions and return
-	if not entities:
-		return message_text
-	
 
-	
-	# Collect all link entities with their positions
-	link_replacements: list[tuple[int, int, str]] = []
-	
+	mention_edits: list[tuple[int, int, str]] = []
+	for entity in entities or []:
+		if isinstance(entity, (MessageEntityMention, MessageEntityMentionName)):
+			offset = getattr(entity, "offset", 0)
+			length = getattr(entity, "length", 0)
+			mention_edits.append((offset, length, ""))
+
+	if not mention_edits:
+		return text.strip()
+
+	result = text
+	for offset, length, replacement in sorted(mention_edits, key=lambda item: item[0], reverse=True):
+		result = result[:offset] + replacement + result[offset + length:]
+
+	result = re.sub(r"[ \t]{2,}", " ", result)
+	return result.strip()
+
+
+def _message_text(message: object, *, include_links: bool = False) -> str:
+	"""Get message text with optional link preservation.
+
+	When include_links is False, link entities are removed from the text.
+	When include_links is True, custom text URLs are formatted inline as
+	'display text: url' and plain URLs are kept as-is.
+	"""
+	raw_text = getattr(message, "message", "") or ""
+	if not raw_text:
+		return ""
+
+	entities = getattr(message, "entities", None) or []
+	text = raw_text
+	entity_edits: list[tuple[int, int, str]] = []
+
 	for entity in entities:
 		if isinstance(entity, MessageEntityTextUrl):
-			# Link with custom display text - format as "display text: url"
 			offset = getattr(entity, "offset", 0)
 			length = getattr(entity, "length", 0)
 			url = getattr(entity, "url", "")
-			display_text = message_text[offset : offset + length]
-			replacement = f"{display_text}: {url}"
-			link_replacements.append((offset, length, replacement))
-		# Plain URLs (MessageEntityUrl) are left unchanged
-	
-	# Sort by offset in reverse order to replace from end to start
-	# This prevents offset shifts when replacing
-	link_replacements.sort(key=lambda x: x[0], reverse=True)
-	
-	# Replace links in the text
-	result = message_text
-	for offset, length, replacement in link_replacements:
-		result = result[:offset] + replacement + result[offset + length:]
-	
-	
-	return result.strip()
+			display_text = raw_text[offset : offset + length]
+			replacement = f"{display_text}: {url}" if include_links else ""
+			entity_edits.append((offset, length, replacement))
+		elif isinstance(entity, MessageEntityUrl) and not include_links:
+			offset = getattr(entity, "offset", 0)
+			length = getattr(entity, "length", 0)
+			entity_edits.append((offset, length, ""))
+
+	for offset, length, replacement in sorted(entity_edits, key=lambda item: item[0], reverse=True):
+		text = text[:offset] + replacement + text[offset + length:]
+
+	text = _remove_mentions(text, entities)
+	text = re.sub(r"[ \t]{2,}", " ", text)
+	return text.strip()
 
 
 def _extract_links(message: object) -> list[dict[str, str]]:
@@ -272,8 +279,9 @@ def _format_message_entry(
 	chat_id: int,
 	chat_title: Optional[str],
 	chat_username: Optional[str],
+	include_links: bool,
 ) -> dict[str, Any]:
-	text = _message_text(message)
+	text = _message_text(message, include_links=include_links)
 	media = _extract_media_info(message)
 	media_types = [item["type"] for item in media]
 	links = _extract_links(message)
@@ -388,6 +396,7 @@ async def clone_messages(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	include_links: bool = False,
 	start_date: Optional[date] = None,
 	end_date: Optional[date] = None,
 ) -> list[dict[str, Any]]:
@@ -431,6 +440,7 @@ async def clone_messages(
 				chat_id=chat_id,
 				chat_title=chat_title,
 				chat_username=chat_username,
+				include_links=include_links,
 			)
 
 			grouped_id = entry.get("grouped_id")
@@ -459,6 +469,7 @@ async def clone_messages_with_objects(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	include_links: bool = False,
 	start_date: Optional[date] = None,
 	end_date: Optional[date] = None,
 ) -> list[tuple[dict[str, Any], object]]:
@@ -474,6 +485,7 @@ async def clone_messages_with_objects(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)
@@ -520,6 +532,7 @@ async def clone_messages_from_channels(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	include_links: bool = False,
 	start_date: Optional[date] = None,
 	end_date: Optional[date] = None,
 ) -> list[dict[str, Any]]:
@@ -534,6 +547,7 @@ async def clone_messages_from_channels(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)
@@ -547,6 +561,7 @@ async def clone_messages_from_channels_with_objects(
 	window_seconds: Optional[int] = None,
 	fetch_limit: int = 200,
 	content_filter: str = "both",
+	include_links: bool = False,
 	start_date: Optional[date] = None,
 	end_date: Optional[date] = None,
 ) -> list[tuple[dict[str, Any], object]]:
@@ -561,6 +576,7 @@ async def clone_messages_from_channels_with_objects(
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)

@@ -75,6 +75,7 @@ channel_id = runtime_config.channel_id
 window_seconds = runtime_config.window_seconds
 fetch_limit = runtime_config.fetch_limit
 content_filter = runtime_config.content_filter
+include_links = runtime_config.include_links
 llm_provider = runtime_config.llm_provider
 start_date = runtime_config.start_date
 end_date = runtime_config.end_date
@@ -321,6 +322,7 @@ async def main() -> None:
 		window_seconds=window_seconds,
 		fetch_limit=fetch_limit,
 		content_filter=content_filter,
+		include_links=include_links,
 		start_date=start_date,
 		end_date=end_date,
 	)
