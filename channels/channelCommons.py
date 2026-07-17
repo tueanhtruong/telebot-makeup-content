@@ -104,7 +104,7 @@ LỌC VÀ LOẠI BỎ NỘI DUNG:
 	1. Nội dung dịch
 		- Tách thành các đoạn ngắn, mỗi đoạn 2–4 câu
 		- Thêm dòng trống giữa các đoạn để dễ đọc
-		- Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần)
+		- Giữ nguyên thuật ngữ kỹ thuật quan trọng (kèm tiếng Anh trong ngoặc nếu cần) và các đường dẫn liên kết quan trọng
 	2. Nguồn gốc
 		- Đặt sau nội dung chính, cách nội dung 1 dòng trống
 		- Nội dung: "Theo {channelName}"
